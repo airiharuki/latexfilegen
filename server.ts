@@ -6,7 +6,6 @@ import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
 
 // Load prompt
-// Assuming system_prompt.txt is in the root or accessible
 const SYSTEM_PROMPT = `You are a LaTeX document generator specializing in creating beautiful, printable academic study guides for the Cambodian Baccalaureate (BAC) exam. You output ONLY raw LaTeX source code — no markdown, no code fences, no explanation, no preamble text. Just the .tex file contents, starting with \\documentclass and ending with \\end{document}.
 
 ════════════════════════════════════════════════════════════
@@ -126,7 +125,7 @@ MANDATORY PREAMBLE — ALWAYS USE THIS EXACTLY
   \\end{tcolorbox}%
 }
 \\newcommand{\\nb}[1]{%
-  \\begin{tcolorbox}[notextbox]
+  \\begin{tcolorbox}[notebox]
     \\textbf{\\color{accentcyan}Note:} #1
   \\end{tcolorbox}%
 }
@@ -296,11 +295,39 @@ OUTPUT FORMAT
 
 When you receive a user request, generate the complete .tex file for that study guide immediately.`;
 
+async function compilePdfRemote(tex: string): Promise<string | null> {
+  try {
+    const form = new FormData();
+    form.append('filecontents[]', new Blob([tex]), 'document.tex');
+    form.append('filename[]', 'document.tex');
+    form.append('engine', 'xelatex');
+    form.append('return', 'pdf');
+    
+    const response = await fetch('https://texlive.net/cgi-bin/latexcgi', {
+      method: 'POST',
+      body: form
+    });
+    
+    if (response.ok) {
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+      return base64;
+    } else {
+      console.error("Remote compilation failed:", response.status);
+      return null;
+    }
+  } catch (err) {
+    console.error("Error calling remote LaTeX compiler:", err);
+    return null;
+  }
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  // Increase payload limit for base64 file uploads
+  app.use(express.json({ limit: '50mb' }));
 
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
@@ -308,7 +335,7 @@ async function startServer() {
 
   app.post('/api/generate', async (req, res) => {
     try {
-      const { subject, topics, extra_rules } = req.body;
+      const { subject, topics, extra_rules, files } = req.body;
       if (!subject || !topics || !topics.length) {
         return res.status(400).json({ detail: "Missing subject or topics" });
       }
@@ -320,7 +347,7 @@ async function startServer() {
       const ai = new GoogleGenAI({ apiKey });
 
       const topic_list = topics.join(", ");
-      const userMessage = `Generate a complete BAC study guide for:
+      let userText = `Generate a complete BAC study guide for:
 
 Subject: ${subject}
 Topics to cover: ${topic_list}
@@ -329,11 +356,30 @@ ${extra_rules ? "Additional rules: " + extra_rules : ""}
 Output ONLY the raw .tex file. Start with \\documentclass. End with \\end{document}.
 No markdown fences. No explanation.`;
 
-      console.log("Generating for:", subject, topics);
+      let contents: any[] = [];
+      
+      // If we have attached files, use multimodal capability
+      if (files && files.length > 0) {
+        userText += "\\n\\nHere is some source material to heavily reference for content, examples, and accurate definitions. Please extract relevant equations, OCR the text, and format it within the study guide requirements:\\n";
+        contents.push(userText);
+        
+        for (const file of files) {
+          contents.push({
+            inlineData: {
+              data: file.data.split(',')[1] || file.data,
+              mimeType: file.mimeType
+            }
+          });
+        }
+      } else {
+        contents = [userText];
+      }
+
+      console.log("Generating for:", subject, topics, "With files:", files ? files.length : 0);
 
       const response = await ai.models.generateContent({
-        model: 'gemini-2.5-pro',
-        contents: userMessage,
+        model: 'gemini-3.1-pro-preview', // Requested by user & highly capable of OCR/Multimodal
+        contents: contents,
         config: {
           systemInstruction: SYSTEM_PROMPT,
           temperature: 0.2,
@@ -362,12 +408,14 @@ No markdown fences. No explanation.`;
       }
       raw_tex = raw_tex.substring(0, lastIdx + endTag.length);
 
-      // Return the generated TeX
-      // Without full local XeLaTeX, we provide raw tex code which user can download.
-      // pdf_base64 is omitted, frontend handles it by disabling PDF download gracefully.
+      // Now attempt PDF compilation
+      console.log("Attempting remote compilation via texlive.net...");
+      let pdfBase64 = await compilePdfRemote(raw_tex);
+
       res.json({
         success: true,
         tex_source: raw_tex,
+        pdf_base64: pdfBase64,
         pages_approx: 15,
       });
 

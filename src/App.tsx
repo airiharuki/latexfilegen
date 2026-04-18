@@ -6,6 +6,8 @@ export default function App() {
   const [topics, setTopics] = useState<string[]>([]);
   const [extraRules, setExtraRules] = useState("");
   const [backendUrl, setBackendUrl] = useState("/api");
+  const [files, setFiles] = useState<{name: string, mimeType: string, data: string}[]>([]);
+  const [activeTab, setActiveTab] = useState<"code" | "pdf">("pdf");
 
   type StateType = "empty" | "loading" | "result" | "error";
   const [appState, setAppState] = useState<StateType>("empty");
@@ -30,6 +32,24 @@ export default function App() {
 
   const removeTopic = (index: number) => {
     setTopics(topics.filter((_, i) => i !== index));
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileList = e.target.files;
+    if (!fileList) return;
+
+    Array.from(fileList).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setFiles(prev => [...prev, { name: file.name, mimeType: file.type, data: base64 }]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
   };
 
   const generate = async () => {
@@ -57,7 +77,7 @@ export default function App() {
       const res = await fetch(`${url}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, topics, extra_rules: extraRules }),
+        body: JSON.stringify({ subject, topics, extra_rules: extraRules, files }),
       });
 
       const data = await res.json();
@@ -203,6 +223,32 @@ export default function App() {
             ></textarea>
           </div>
 
+          <div className="flex flex-col gap-2">
+            <label className="text-[0.72rem] font-semibold tracking-wider uppercase text-[#BDC3C7]">
+              Square 1 File Upload <span className="text-[0.72rem] opacity-70 normal-case tracking-normal">— optional OCR</span>
+            </label>
+            <div className="bg-[#162230] border border-[#2E86C1]/20 rounded-lg p-3 text-center border-dashed relative">
+              <input 
+                type="file" 
+                multiple 
+                onChange={handleFileUpload} 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                accept="application/pdf,image/*,text/plain"
+              />
+              <p className="text-[0.8rem] text-[#BDC3C7]/70">Drag & drop or click to upload slides, textbooks</p>
+            </div>
+            {files.length > 0 && (
+              <div className="flex flex-col gap-1.5 mt-1">
+                {files.map((f, i) => (
+                  <div key={i} className="flex items-center justify-between bg-[#17A589]/10 border border-[#17A589]/20 rounded px-2.5 py-1.5">
+                    <span className="text-[0.8rem] text-[#17A589] truncate max-w-[200px]">{f.name}</span>
+                    <button onClick={() => removeFile(i)} className="text-[#17A589]/70 hover:text-[#17A589] ml-2 text-[0.9rem] font-bold">×</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="h-px bg-[#2E86C1]/20 shrink-0"></div>
 
           <button 
@@ -269,9 +315,17 @@ export default function App() {
                 <div className="py-5 px-8 border-b border-[#2E86C1]/20 flex items-center justify-between bg-[#162230] shrink-0">
                   <div>
                     <h3 className="font-serif text-[1.2rem] text-white tracking-tight">{subject} Study Guide</h3>
-                    <p className="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-0.5 rounded-full text-[0.7rem] font-medium bg-[#17A589]/10 border border-[#17A589]/25 text-[#17A589]">
-                      ✓ Generated via Gemini API
-                    </p>
+                    <div className="flex items-center gap-3 mt-1.5">
+                      <p className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[0.7rem] font-medium bg-[#17A589]/10 border border-[#17A589]/25 text-[#17A589]">
+                        ✓ Generated via Gemini API
+                      </p>
+                      {pdfBase64 && (
+                        <div className="flex bg-[#0D1B2A] rounded-md overflow-hidden border border-[#2E86C1]/30">
+                          <button onClick={() => setActiveTab("pdf")} className={`px-3 py-1 text-[0.75rem] font-medium transition-colors ${activeTab === 'pdf' ? 'bg-[#2E86C1]/20 text-[#2E86C1]' : 'text-[#BDC3C7]/70 hover:bg-[#2E86C1]/10'}`}>PDF View</button>
+                          <button onClick={() => setActiveTab("code")} className={`px-3 py-1 text-[0.75rem] font-medium transition-colors ${activeTab === 'code' ? 'bg-[#2E86C1]/20 text-[#2E86C1]' : 'text-[#BDC3C7]/70 hover:bg-[#2E86C1]/10'}`}>Code</button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-3">
                     <button onClick={downloadTex} className="px-4 py-2 rounded-lg font-semibold text-[0.82rem] transition-all border border-[#2E86C1]/20 text-[#BDC3C7] hover:border-[#2E86C1] hover:text-[#2E86C1] hover:bg-[#2E86C1]/5 shadow-sm">
@@ -284,10 +338,18 @@ export default function App() {
                     )}
                   </div>
                 </div>
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-[#091018]">
-                  <pre className="font-mono text-[0.78rem] text-[#8BB8D4] leading-relaxed whitespace-pre-wrap break-words selection:bg-[#2E86C1]/30 selection:text-white">
-                    {texSource}
-                  </pre>
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-[#091018] relative">
+                  {!pdfBase64 || activeTab === 'code' ? (
+                    <pre className="font-mono text-[0.78rem] text-[#8BB8D4] leading-relaxed whitespace-pre-wrap break-words selection:bg-[#2E86C1]/30 selection:text-white">
+                      {texSource}
+                    </pre>
+                  ) : (
+                    <iframe 
+                      src={`data:application/pdf;base64,${pdfBase64}`} 
+                      className="w-full h-full rounded border border-[#2E86C1]/20"
+                      title="PDF Preview"
+                    />
+                  )}
                 </div>
               </div>
             )}
