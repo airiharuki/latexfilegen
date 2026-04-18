@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyForge — BAC Study Guide Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0D1B2A;
+      --indigo:     #1B4F72;
+      --sky:        #2E86C1;
+      --cyan:       #17A589;
+      --gold:       #D4AC0D;
+      --rose:       #C0392B;
+      --lavender:   #7D3C98;
+      --midgray:    #BDC3C7;
+      --darkgray:   #2C3E50;
+      --surface:    #111D2B;
+      --surface2:   #162230;
+      --border:     rgba(46,134,193,0.18);
+      --glow:       rgba(23,165,137,0.12);
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--navy);
+      color: #E8EDF2;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* ── Grid dots background ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(46,134,193,0.12) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── Accent blobs ── */
+    body::after {
+      content: '';
+      position: fixed;
+      top: -200px; right: -200px;
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(23,165,137,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    #app {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 2rem 2.5rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-mark {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--sky), var(--cyan));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.2rem;
+      color: white;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(23,165,137,0.3);
+    }
+
+    .logo-text h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.4rem;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .logo-text p {
+      font-size: 0.75rem;
+      color: var(--midgray);
+      font-weight: 300;
+    }
+
+    /* ── Main layout ── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 0;
+      max-height: calc(100vh - 85px);
+      overflow: hidden;
+    }
+
+    /* ── Left panel ── */
+    .panel-left {
+      padding: 2rem;
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .panel-left::-webkit-scrollbar { width: 4px; }
+    .panel-left::-webkit-scrollbar-track { background: transparent; }
+    .panel-left::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    /* ── Right panel ── */
+    .panel-right {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Form groups ── */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--midgray);
+    }
+
+    input[type="text"], textarea, select {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 0.9rem;
+      color: #E8EDF2;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+
+    input[type="text"]:focus, textarea:focus, select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(23,165,137,0.12);
+    }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* ── Topics chip input ── */
+    .topics-container {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      cursor: text;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      min-height: 48px;
+    }
+
+    .topics-container:focus-within {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(23,165,137,0.12);
+    }
+
+    .chip {
+      background: rgba(23,165,137,0.15);
+      border: 1px solid rgba(23,165,137,0.3);
+      border-radius: 5px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      animation: chipIn 0.15s ease;
+    }
+
+    @keyframes chipIn {
+      from { opacity: 0; transform: scale(0.85); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .chip-remove {
+      background: none;
+      border: none;
+      color: var(--cyan);
+      cursor: pointer;
+      font-size: 0.9rem;
+      line-height: 1;
+      padding: 0;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+    }
+
+    .chip-remove:hover { opacity: 1; }
+
+    #topic-input {
+      background: none;
+      border: none;
+      outline: none;
+      color: #E8EDF2;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.9rem;
+      flex: 1;
+      min-width: 120px;
+      padding: 0.2rem 0.4rem;
+    }
+
+    .topic-hint {
+      font-size: 0.72rem;
+      color: var(--midgray);
+      opacity: 0.7;
+    }
+
+    /* ── Generate button ── */
+    .btn-generate {
+      background: linear-gradient(135deg, var(--sky), var(--cyan));
+      border: none;
+      border-radius: 10px;
+      padding: 0.85rem 1.5rem;
+      color: white;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(23,165,137,0.25);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .btn-generate:hover:not(:disabled) {
+      opacity: 0.9;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(23,165,137,0.35);
+    }
+
+    .btn-generate:active:not(:disabled) { transform: translateY(0); }
+    .btn-generate:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Section divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+    }
+
+    .section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--sky);
+    }
+
+    /* ── Right panel states ── */
+    .state-empty, .state-loading, .state-result, .state-error {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem;
+      text-align: center;
+    }
+
+    .state-empty .icon {
+      font-size: 3.5rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .state-empty h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.5rem;
+      color: var(--midgray);
+      margin-bottom: 0.5rem;
+    }
+
+    .state-empty p {
+      color: var(--midgray);
+      opacity: 0.6;
+      font-size: 0.85rem;
+      max-width: 300px;
+    }
+
+    /* ── Loading animation ── */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    .loader-rings {
+      position: relative;
+      width: 64px; height: 64px;
+    }
+
+    .loader-rings span {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      animation: spin 1.4s linear infinite;
+    }
+
+    .loader-rings span:nth-child(1) {
+      border-top-color: var(--cyan);
+    }
+
+    .loader-rings span:nth-child(2) {
+      inset: 8px;
+      border-top-color: var(--sky);
+      animation-duration: 1s;
+      animation-direction: reverse;
+    }
+
+    .loader-rings span:nth-child(3) {
+      inset: 16px;
+      border-top-color: var(--gold);
+      animation-duration: 0.7s;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loader-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      text-align: left;
+    }
+
+    .loader-step {
+      font-size: 0.82rem;
+      color: var(--midgray);
+      opacity: 0.4;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: opacity 0.4s, color 0.4s;
+    }
+
+    .loader-step.active {
+      opacity: 1;
+      color: var(--cyan);
+    }
+
+    .loader-step.done {
+      opacity: 0.7;
+      color: var(--midgray);
+    }
+
+    .loader-step.done::before { content: '✓ '; color: var(--cyan); }
+    .loader-step.active::before { content: '→ '; }
+    .loader-step:not(.active):not(.done)::before { content: '○ '; }
+
+    /* ── Result panel ── */
+    .state-result {
+      align-items: stretch;
+      justify-content: flex-start;
+      padding: 0;
+    }
+
+    .result-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface2);
+    }
+
+    .result-meta h3 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .result-meta p {
+      font-size: 0.78rem;
+      color: var(--midgray);
+    }
+
+    .result-actions {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .btn-action {
+      padding: 0.5rem 1rem;
+      border-radius: 7px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-pdf {
+      background: linear-gradient(135deg, var(--sky), var(--cyan));
+      border: none;
+      color: white;
+      box-shadow: 0 2px 12px rgba(23,165,137,0.2);
+    }
+
+    .btn-pdf:hover { opacity: 0.85; transform: translateY(-1px); }
+
+    .btn-tex {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--midgray);
+    }
+
+    .btn-tex:hover { border-color: var(--sky); color: var(--sky); }
+
+    /* ── Code preview ── */
+    .tex-preview {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.5rem 2rem;
+    }
+
+    .tex-preview::-webkit-scrollbar { width: 4px; }
+    .tex-preview::-webkit-scrollbar-track { background: transparent; }
+    .tex-preview::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .tex-preview pre {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.75rem;
+      color: #8BB8D4;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    /* ── Error state ── */
+    .state-error .error-box {
+      background: rgba(192,57,43,0.08);
+      border: 1px solid rgba(192,57,43,0.3);
+      border-radius: 10px;
+      padding: 1.5rem;
+      max-width: 480px;
+      text-align: left;
+    }
+
+    .state-error h3 {
+      color: var(--rose);
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .state-error pre {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--midgray);
+      white-space: pre-wrap;
+      margin-top: 0.75rem;
+      opacity: 0.8;
+    }
+
+    .btn-retry {
+      margin-top: 1rem;
+      padding: 0.5rem 1.2rem;
+      background: transparent;
+      border: 1px solid var(--rose);
+      border-radius: 7px;
+      color: var(--rose);
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-retry:hover { background: rgba(192,57,43,0.1); }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+
+    .badge-cyan {
+      background: rgba(23,165,137,0.12);
+      border: 1px solid rgba(23,165,137,0.25);
+      color: var(--cyan);
+    }
+
+    /* ── API key input toggle ── */
+    .api-key-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .api-key-row input { flex: 1; font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+
+    .btn-icon {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 0 0.7rem;
+      color: var(--midgray);
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+    .btn-icon:hover { color: var(--sky); }
+
+    /* ── Footer ── */
+    .panel-footer {
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.72rem;
+      color: var(--midgray);
+      opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+      .panel-left { max-height: 50vh; }
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-mark">∫</div>
+    <div class="logo-text">
+      <h1>StudyForge</h1>
+      <p>BAC Study Guide Generator — Powered by Gemini + XeLaTeX</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- ── Left panel: form ── -->
+    <div class="panel-left">
+
+      <!-- API key -->
+      <div class="form-group">
+        <label>Backend URL</label>
+        <input type="text" id="backend-url" placeholder="http://localhost:8000" value="http://localhost:8000" />
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Subject -->
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" id="subject" placeholder="e.g. Physics, Chemistry, Mathematics" />
+      </div>
+
+      <!-- Topics chip input -->
+      <div class="form-group">
+        <label>Topics <span class="topic-hint">— press Enter or comma to add</span></label>
+        <div class="topics-container" id="topics-container" onclick="document.getElementById('topic-input').focus()">
+          <input type="text" id="topic-input" placeholder="Add a topic..." autocomplete="off" />
+        </div>
+      </div>
+
+      <!-- Extra rules -->
+      <div class="form-group">
+        <label>Extra Rules <span class="topic-hint">— optional</span></label>
+        <textarea id="extra-rules" placeholder="e.g. Use g = 10 m/s², include SI units table, focus on exam-style questions..."></textarea>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Generate button -->
+      <button class="btn-generate" id="btn-generate" onclick="generate()">
+        <span id="btn-text">✦ Generate Study Guide</span>
+      </button>
+
+      <div class="panel-footer">
+        Gemini generates LaTeX → XeLaTeX compiles → PDF ready to print
+      </div>
+
+    </div>
+
+    <!-- ── Right panel: output ── -->
+    <div class="panel-right" id="panel-right">
+
+      <!-- Empty state -->
+      <div class="state-empty" id="state-empty">
+        <div class="icon">📄</div>
+        <h2>Nothing yet</h2>
+        <p>Fill in a subject and topics, then hit Generate. Your PDF will appear here.</p>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script>
+  // ── Topic chips ────────────────────────────────────────────────────────────
+  const topics = [];
+
+  document.getElementById('topic-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTopic(e.target.value.trim().replace(/,$/, ''));
+      e.target.value = '';
+    } else if (e.key === 'Backspace' && e.target.value === '' && topics.length > 0) {
+      removeTopic(topics.length - 1);
+    }
+  });
+
+  function addTopic(val) {
+    if (!val || topics.includes(val)) return;
+    topics.push(val);
+    renderChips();
+  }
+
+  function removeTopic(i) {
+    topics.splice(i, 1);
+    renderChips();
+  }
+
+  function renderChips() {
+    const container = document.getElementById('topics-container');
+    const input = document.getElementById('topic-input');
+    container.innerHTML = '';
+    topics.forEach((t, i) => {
+      const chip = document.createElement('div');
+      chip.className = 'chip';
+      chip.innerHTML = `${t}<button class="chip-remove" onclick="removeTopic(${i})">×</button>`;
+      container.appendChild(chip);
+    });
+    container.appendChild(input);
+    input.focus();
+  }
+
+  // ── State management ───────────────────────────────────────────────────────
+  function setState(html) {
+    document.getElementById('panel-right').innerHTML = html;
+  }
+
+  function showEmpty() {
+    setState(`
+      <div class="state-empty">
+        <div class="icon">📄</div>
+        <h2>Nothing yet</h2>
+        <p>Fill in a subject and topics, then hit Generate.</p>
+      </div>
+    `);
+  }
+
+  function showLoading() {
+    setState(`
+      <div class="state-loading">
+        <div class="loader">
+          <div class="loader-rings">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="loader-steps">
+            <div class="loader-step active" id="step-1">Calling Gemini to generate LaTeX</div>
+            <div class="loader-step" id="step-2">Validating and sanitizing output</div>
+            <div class="loader-step" id="step-3">Compiling with XeLaTeX (2 passes)</div>
+            <div class="loader-step" id="step-4">Packaging your PDF</div>
+          </div>
+        </div>
+      </div>
+    `);
+
+    // Animate steps (rough timing, actual progress comes from response)
+    const timings = [0, 8000, 12000, 18000];
+    timings.forEach((t, i) => {
+      setTimeout(() => {
+        const steps = document.querySelectorAll('.loader-step');
+        steps.forEach((s, j) => {
+          if (j < i) { s.classList.remove('active'); s.classList.add('done'); }
+          else if (j === i) s.classList.add('active');
+          else { s.classList.remove('active', 'done'); }
+        });
+      }, t);
+    });
+  }
+
+  function showResult(subject, texSource, pdfBase64) {
+    setState(`
+      <div class="state-result">
+        <div class="result-header">
+          <div class="result-meta">
+            <h3>${subject} Study Guide</h3>
+            <p class="badge badge-cyan">✓ Compiled successfully</p>
+          </div>
+          <div class="result-actions">
+            <button class="btn-action btn-tex" onclick="downloadTex()">⬇ .tex</button>
+            <button class="btn-action btn-pdf" onclick="downloadPdf()">⬇ Download PDF</button>
+          </div>
+        </div>
+        <div class="tex-preview">
+          <pre id="tex-code"></pre>
+        </div>
+      </div>
+    `);
+
+    // Store for download
+    window._texSource = texSource;
+    window._pdfBase64 = pdfBase64;
+    window._subject = subject;
+
+    // Render tex source (truncate if huge)
+    const preview = texSource.length > 8000 ? texSource.slice(0, 8000) + '\n\n... (truncated for preview)' : texSource;
+    document.getElementById('tex-code').textContent = preview;
+  }
+
+  function showError(detail) {
+    setState(`
+      <div class="state-error">
+        <div class="error-box">
+          <h3>⚠ Generation failed</h3>
+          <p style="color: var(--midgray); font-size: 0.85rem;">Something went wrong during generation or compilation.</p>
+          <pre>${escapeHtml(detail)}</pre>
+          <button class="btn-retry" onclick="showEmpty()">← Try again</button>
+        </div>
+      </div>
+    `);
+  }
+
+  // ── Downloads ──────────────────────────────────────────────────────────────
+  function downloadPdf() {
+    const bytes = atob(window._pdfBase64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    const blob = new Blob([arr], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${window._subject.replace(/\s+/g, '_')}_Study_Guide.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadTex() {
+    const blob = new Blob([window._texSource], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${window._subject.replace(/\s+/g, '_')}_Study_Guide.tex`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ── Generate ───────────────────────────────────────────────────────────────
+  async function generate() {
+    const subject = document.getElementById('subject').value.trim();
+    const backendUrl = document.getElementById('backend-url').value.trim().replace(/\/$/, '');
+    const extraRules = document.getElementById('extra-rules').value.trim();
+
+    if (!subject) { alert('Please enter a subject.'); return; }
+    if (topics.length === 0) { alert('Please add at least one topic.'); return; }
+    if (!backendUrl) { alert('Please enter the backend URL.'); return; }
+
+    const btn = document.getElementById('btn-generate');
+    btn.disabled = true;
+
+    showLoading();
+
+    try {
+      const res = await fetch(`${backendUrl}/generate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, topics, extra_rules: extraRules }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        showError(data.detail || JSON.stringify(data));
+        return;
+      }
+
+      showResult(subject, data.tex_source, data.pdf_base64);
+
+    } catch (err) {
+      showError(`Network error: ${err.message}\n\nMake sure the backend is running at ${backendUrl}`);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  // ── Utils ──────────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // Allow Enter to submit
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.ctrlKey) generate();
+  });
+</script>
+</body>
+</html>
