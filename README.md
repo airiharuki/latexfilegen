@@ -15,6 +15,7 @@ Because using L'Hôpital's Rule on the BAC exam is illegal, and someone needs to
 ## Features 🚀
 * **Remote PDF Compilation:** Native LaTeX is heavy. We pipe the output straight into an external texlive compiler and serve you the live PDF directly in the browser!
 * **"Square 1" File Upload (OCR):** Have terrible handwriting or 50 slides you didn't read? Drag and drop your PDFs, photos, or text files into the *Square 1* file uploader. Powered by Gemini 3.1 Pro's multi-modal OCR, it reads your messy notes and transforms them into organized cheat sheets.
+* **Full Grade 12 Syllabus Mode:** Don't even want to type the topics? Just hit the "Auto-generate Full Grade 12 Curriculum" toggle. It'll automatically tell Gemini to outline and map out the entire standard Cambodian Grade 12 syllabus for that subject.
 * **Dark Mode UI:** Because let's be honest, you're only using this at 3:00 AM.
 * **Strict BAC Guidelines:** It knows what you can and can't do on the exam. (Seriously, stop trying to use the Tabular DI method).
 * **Copy-Paste Ready:** Download the generated PDF right away or pull the raw `.tex` to tweak on [Overleaf](https://www.overleaf.com/).

@@ -335,9 +335,12 @@ async function startServer() {
 
   app.post('/api/generate', async (req, res) => {
     try {
-      const { subject, topics, extra_rules, files } = req.body;
-      if (!subject || !topics || !topics.length) {
-        return res.status(400).json({ detail: "Missing subject or topics" });
+      const { subject, topics, extra_rules, files, full_syllabus } = req.body;
+      if (!subject) {
+        return res.status(400).json({ detail: "Missing subject" });
+      }
+      if (!full_syllabus && (!topics || !topics.length)) {
+        return res.status(400).json({ detail: "Missing topics. Provide limits or select full syllabus." });
       }
 
       const apiKey = process.env.GEMINI_API_KEY;
@@ -346,11 +349,14 @@ async function startServer() {
       }
       const ai = new GoogleGenAI({ apiKey });
 
-      const topic_list = topics.join(", ");
+      const topic_instruction = full_syllabus 
+        ? "Topics to cover: The ENTIRE standard Cambodian Grade 12 curriculum for this subject. Outline and exhaustively cover all major chapters required for the BAC exam."
+        : `Topics to cover: ${topics.join(", ")}`;
+
       let userText = `Generate a complete BAC study guide for:
 
 Subject: ${subject}
-Topics to cover: ${topic_list}
+${topic_instruction}
 ${extra_rules ? "Additional rules: " + extra_rules : ""}
 
 Output ONLY the raw .tex file. Start with \\documentclass. End with \\end{document}.

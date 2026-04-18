@@ -8,6 +8,7 @@ export default function App() {
   const [backendUrl, setBackendUrl] = useState("/api");
   const [files, setFiles] = useState<{name: string, mimeType: string, data: string}[]>([]);
   const [activeTab, setActiveTab] = useState<"code" | "pdf">("pdf");
+  const [fullSyllabus, setFullSyllabus] = useState(false);
 
   type StateType = "empty" | "loading" | "result" | "error";
   const [appState, setAppState] = useState<StateType>("empty");
@@ -57,8 +58,8 @@ export default function App() {
       alert("Please enter a subject.");
       return;
     }
-    if (topics.length === 0) {
-      alert("Please add at least one topic.");
+    if (!fullSyllabus && topics.length === 0) {
+      alert("Please add at least one topic, or select 'Full Grade 12 Syllabus'.");
       return;
     }
 
@@ -77,7 +78,7 @@ export default function App() {
       const res = await fetch(`${url}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, topics, extra_rules: extraRules, files }),
+        body: JSON.stringify({ subject, topics, extra_rules: extraRules, files, full_syllabus: fullSyllabus }),
       });
 
       const data = await res.json();
@@ -177,9 +178,15 @@ export default function App() {
               onChange={(e) => setSubject(e.target.value)}
               placeholder="e.g. Physics, Chemistry, Mathematics"
             />
+            <button 
+              onClick={() => setFullSyllabus(!fullSyllabus)}
+              className={`mt-1 flex items-center justify-center gap-2 text-[0.75rem] font-medium px-3 py-2 rounded-lg border transition-all w-full ${fullSyllabus ? 'bg-[#17A589]/20 border-[#17A589]/50 text-[#17A589] shadow-[0_0_15px_rgba(23,165,137,0.15)]' : 'bg-[#162230] border-[#2E86C1]/20 text-[#BDC3C7]/70 hover:border-[#2E86C1]/50 hover:text-[#BDC3C7]'}`}
+            >
+              {fullSyllabus ? '✓ Covering Full Grade 12 Curriculum' : '◯ Auto-generate Full Grade 12 Curriculum'}
+            </button>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className={`flex flex-col gap-2 transition-opacity duration-300 ${fullSyllabus ? 'opacity-40 pointer-events-none' : ''}`}>
             <label className="text-[0.72rem] font-semibold tracking-wider uppercase text-[#BDC3C7]">
               Topics <span className="text-[0.72rem] opacity-70 normal-case tracking-normal">— press Enter to add</span>
             </label>
