@@ -9,6 +9,7 @@ export default function App() {
   const [files, setFiles] = useState<{name: string, mimeType: string, data: string}[]>([]);
   const [activeTab, setActiveTab] = useState<"code" | "pdf">("pdf");
   const [fullSyllabus, setFullSyllabus] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("gemini-3.1-pro-preview");
 
   type StateType = "empty" | "loading" | "result" | "error";
   const [appState, setAppState] = useState<StateType>("empty");
@@ -78,7 +79,7 @@ export default function App() {
       const res = await fetch(`${url}/generate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ subject, topics, extra_rules: extraRules, files, full_syllabus: fullSyllabus }),
+        body: JSON.stringify({ subject, topics, extra_rules: extraRules, files, full_syllabus: fullSyllabus, model: selectedModel }),
       });
 
       const data = await res.json();
@@ -128,269 +129,310 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-[#0D1B2A] text-[#E8EDF2] font-outfit relative z-10 w-full overflow-hidden">
+    <div className="flex flex-col min-h-[100dvh] bg-[#000000] text-white/90 font-sans relative z-10 w-full overflow-x-hidden selection:bg-white/30">
+      {/* VHS Grain Overlay */}
       <div 
-        className="fixed inset-0 pointer-events-none z-0" 
+        className="fixed inset-0 z-50 pointer-events-none opacity-[0.25] mix-blend-overlay"
         style={{
-          backgroundImage: 'radial-gradient(circle, rgba(46,134,193,0.12) 1px, transparent 1px)', 
-          backgroundSize: '28px 28px'
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`
         }}
       />
-      <div 
-        className="fixed top-[-200px] right-[-200px] w-[600px] h-[600px] pointer-events-none z-0"
-        style={{ background: 'radial-gradient(circle, rgba(23,165,137,0.06) 0%, transparent 70%)' }}
-      />
+      
+      {/* Liquid Orbs Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] rounded-full mix-blend-screen filter blur-[100px] opacity-40 animate-blob bg-gradient-to-r from-purple-600 via-fuchsia-600 to-indigo-600"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[50vw] h-[50vw] rounded-full mix-blend-screen filter blur-[120px] opacity-30 animate-blob animation-delay-2000 bg-gradient-to-r from-blue-500 to-cyan-400"></div>
+        <div className="absolute bottom-[-20%] left-[20%] w-[70vw] h-[70vw] rounded-full mix-blend-screen filter blur-[140px] opacity-20 animate-blob animation-delay-4000 bg-gradient-to-r from-rose-500 to-orange-500"></div>
+      </div>
 
-      {/* Header */}
-      <header className="relative z-10 px-10 py-8 pb-6 border-b border-[#2E86C1]/20 flex items-center gap-4 shrink-0">
-        <div className="w-[38px] h-[38px] rounded-lg tracking-[-2px] flex items-center justify-center font-serif text-[1.2rem] text-white shrink-0 shadow-[0_0_20px_rgba(23,165,137,0.3)] bg-gradient-to-br from-[#2E86C1] to-[#17A589]">
-          ∫
-        </div>
-        <div>
-          <h1 className="font-serif text-[1.4rem] text-white tracking-tight leading-[1] mt-0 -mt-[1px]">StudyForge</h1>
-          <p className="text-[0.75rem] text-[#BDC3C7] font-light mt-0.5">BAC Study Guide Generator — Powered by Gemini</p>
-        </div>
-      </header>
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+        
+        {/* State: Empty - In Your Face Glass Form */}
+        {appState === "empty" && (
+          <div className="w-full max-w-3xl flex flex-col gap-10 animate-fade-in py-10">
+            
+            <div className="text-center md:text-left flex flex-col md:flex-row md:items-end justify-between gap-5">
+              <div>
+                <h1 className="text-[3rem] md:text-[4.5rem] font-black tracking-tighter leading-[0.85] text-white">
+                  BAC
+                  <br />
+                  <span className="text-white/30 mix-blend-overlay drop-shadow-2xl">STUDYFORGE.</span>
+                </h1>
+              </div>
+              <div className="text-white/50 font-medium tracking-tight text-base mb-1.5 max-w-sm text-balance">
+                Fluid intelligent generation. Drop your subject. Get a perfect printable standard-compliant LaTeX guide.
+              </div>
+            </div>
 
-      <main className="relative z-10 flex-1 grid md:grid-cols-[420px_1fr] flex-col overflow-hidden max-h-[calc(100vh-95px)]">
-        {/* Left Panel */}
-        <div className="p-8 border-r border-[#2E86C1]/20 overflow-y-auto flex flex-col gap-6 custom-scrollbar max-h-[40vh] md:max-h-none shrink-0 bg-[#0D1B2A]/50 backdrop-blur-sm">
-          
-          <div className="flex flex-col gap-2">
-            <label className="text-[0.72rem] font-semibold tracking-wider uppercase text-[#BDC3C7]">Backend URL</label>
-            <input 
-              type="text" 
-              className="bg-[#162230] border border-[#2E86C1]/20 rounded-lg py-2.5 px-3.5 text-[#E8EDF2] text-[0.9rem] outline-none focus:border-[#17A589] focus:ring-[3px] focus:ring-[#17A589]/10 transition-all w-full"
-              value={backendUrl}
-              onChange={(e) => setBackendUrl(e.target.value)}
-              placeholder="/api"
-            />
-          </div>
-
-          <div className="h-px bg-[#2E86C1]/20 shrink-0"></div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[0.72rem] font-semibold tracking-wider uppercase text-[#BDC3C7]">Subject</label>
-            <input 
-              type="text" 
-              className="bg-[#162230] border border-[#2E86C1]/20 rounded-lg py-2.5 px-3.5 text-[#E8EDF2] text-[0.9rem] outline-none focus:border-[#17A589] focus:ring-[3px] focus:ring-[#17A589]/10 transition-all w-full"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              placeholder="e.g. Physics, Chemistry, Mathematics"
-            />
-            <button 
-              onClick={() => setFullSyllabus(!fullSyllabus)}
-              className={`mt-1 flex items-center justify-center gap-2 text-[0.75rem] font-medium px-3 py-2 rounded-lg border transition-all w-full ${fullSyllabus ? 'bg-[#17A589]/20 border-[#17A589]/50 text-[#17A589] shadow-[0_0_15px_rgba(23,165,137,0.15)]' : 'bg-[#162230] border-[#2E86C1]/20 text-[#BDC3C7]/70 hover:border-[#2E86C1]/50 hover:text-[#BDC3C7]'}`}
-            >
-              {fullSyllabus ? '✓ Covering Full Grade 12 Curriculum' : '◯ Auto-generate Full Grade 12 Curriculum'}
-            </button>
-          </div>
-
-          <div className={`flex flex-col gap-2 transition-opacity duration-300 ${fullSyllabus ? 'opacity-40 pointer-events-none' : ''}`}>
-            <label className="text-[0.72rem] font-semibold tracking-wider uppercase text-[#BDC3C7]">
-              Topics <span className="text-[0.72rem] opacity-70 normal-case tracking-normal">— press Enter to add</span>
-            </label>
-            <div 
-              className="bg-[#162230] border border-[#2E86C1]/20 rounded-lg p-2 min-h-[48px] flex flex-wrap gap-1.5 cursor-text focus-within:border-[#17A589] focus-within:ring-[3px] focus-within:ring-[#17A589]/10 transition-all"
-              onClick={() => document.getElementById('topic-input')?.focus()}
-            >
-                {topics.map((t, i) => (
-                  <div 
-                    key={i} 
-                    className="bg-[#17A589]/15 border border-[#17A589]/30 rounded-[5px] py-1 px-2.5 text-[0.8rem] text-[#17A589] flex items-center gap-1.5"
+            <div className="w-full bg-transparent border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] rounded-[2rem] p-5 md:p-8 flex flex-col gap-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.01] pointer-events-none rounded-[2rem]" />
+              
+              <div className="grid md:grid-cols-2 gap-6 relative z-10">
+                <div className="flex flex-col gap-2.5">
+                  <label className="text-xs font-bold tracking-widest uppercase text-white/50 pl-1">Subject</label>
+                  <input 
+                    type="text" 
+                    className="w-full bg-black/20 border border-white/10 rounded-2xl py-3 px-4 text-white text-lg md:text-xl font-medium outline-none placeholder:text-white/20 focus:border-white/40 focus:bg-black/40 transition-all shadow-inner"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="Mathematics, Physics..."
+                  />
+                  
+                  <button 
+                    onClick={() => setFullSyllabus(!fullSyllabus)}
+                    className={`mt-1.5 py-2.5 px-4 rounded-xl border font-medium text-xs transition-all flex items-center justify-center gap-2 ${fullSyllabus ? 'bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.3)]' : 'bg-black/20 border-white/10 text-white/60 hover:bg-white/10 hover:text-white'}`}
                   >
-                    {t}
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); removeTopic(i); }}
-                      className="text-[#17A589] opacity-60 hover:opacity-100 transition-opacity p-0"
-                    >×</button>
-                  </div>
-                ))}
-              <input 
-                id="topic-input"
-                type="text"
-                className="bg-transparent border-none outline-none text-[#E8EDF2] text-[0.9rem] flex-1 min-w-[120px] p-1"
-                placeholder={topics.length === 0 ? "Add a topic..." : ""}
-                value={topicInput}
-                onChange={(e) => setTopicInput(e.target.value)}
-                onKeyDown={handleTopicKeyDown}
-              />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[0.72rem] font-semibold tracking-wider uppercase text-[#BDC3C7]">
-              Extra Rules <span className="text-[0.72rem] opacity-70 normal-case tracking-normal">— optional</span>
-            </label>
-            <textarea 
-              className="bg-[#162230] border border-[#2E86C1]/20 rounded-lg py-2.5 px-3.5 text-[#E8EDF2] text-[0.9rem] outline-none focus:border-[#17A589] focus:ring-[3px] focus:ring-[#17A589]/10 transition-all w-full resize-y min-h-[80px]"
-              value={extraRules}
-              onChange={(e) => setExtraRules(e.target.value)}
-              placeholder="e.g. Use g = 10 m/s², include SI units table..."
-            ></textarea>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <label className="text-[0.72rem] font-semibold tracking-wider uppercase text-[#BDC3C7]">
-              Square 1 File Upload <span className="text-[0.72rem] opacity-70 normal-case tracking-normal">— optional OCR</span>
-            </label>
-            <div className="bg-[#162230] border border-[#2E86C1]/20 rounded-lg p-3 text-center border-dashed relative">
-              <input 
-                type="file" 
-                multiple 
-                onChange={handleFileUpload} 
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                accept="application/pdf,image/*,text/plain"
-              />
-              <p className="text-[0.8rem] text-[#BDC3C7]/70">Drag & drop or click to upload slides, textbooks</p>
-            </div>
-            {files.length > 0 && (
-              <div className="flex flex-col gap-1.5 mt-1">
-                {files.map((f, i) => (
-                  <div key={i} className="flex items-center justify-between bg-[#17A589]/10 border border-[#17A589]/20 rounded px-2.5 py-1.5">
-                    <span className="text-[0.8rem] text-[#17A589] truncate max-w-[200px]">{f.name}</span>
-                    <button onClick={() => removeFile(i)} className="text-[#17A589]/70 hover:text-[#17A589] ml-2 text-[0.9rem] font-bold">×</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="h-px bg-[#2E86C1]/20 shrink-0"></div>
-
-          <button 
-            disabled={appState === "loading"}
-            onClick={generate}
-            className="w-full bg-gradient-to-br from-[#2E86C1] to-[#17A589] text-white py-3.5 rounded-xl font-semibold text-[0.95rem] shadow-[0_4px_20px_rgba(23,165,137,0.25)] hover:shadow-[0_6px_28px_rgba(23,165,137,0.35)] hover:-translate-y-[1px] disabled:opacity-45 disabled:hover:translate-y-0 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 mt-2 shrink-0"
-          >
-            ✦ Generate Study Guide
-          </button>
-
-          <div className="pt-2 text-center text-[#BDC3C7]/40 text-[0.75rem]">
-            Gemini generates LaTeX → Ready for XeLaTeX
-          </div>
-        </div>
-
-        {/* Right Panel */}
-        <div className="flex flex-col overflow-hidden relative bg-[#091018]/50">
-          
-            {appState === "empty" && (
-              <div 
-                key="empty"
-                className="flex-1 flex flex-col items-center justify-center p-12 text-center transition-opacity"
-              >
-                <div className="text-[3.5rem] opacity-30 mb-4">📄</div>
-                <h2 className="font-serif text-[1.5rem] text-[#BDC3C7] mb-2">Nothing yet</h2>
-                <p className="text-[#BDC3C7]/60 text-[0.85rem] max-w-[300px]">Fill in a subject and topics, then hit Generate. Your LaTeX code will appear here.</p>
-              </div>
-            )}
-
-            {appState === "loading" && (
-              <div 
-                key="loading"
-                className="flex-1 flex flex-col items-center justify-center p-12 text-center bg-[#0D1B2A]/80 backdrop-blur-sm transition-opacity"
-              >
-                <div className="flex flex-col items-center gap-8">
-                  <div className="relative w-16 h-16 shadow-[0_0_30px_rgba(23,165,137,0.2)] rounded-full">
-                    <span className="absolute inset-0 rounded-full border-2 border-transparent border-t-[#17A589] animate-spin"></span>
-                    <span className="absolute inset-[8px] rounded-full border-2 border-transparent border-t-[#2E86C1] animate-[spin_1s_linear_infinite_reverse]"></span>
-                    <span className="absolute inset-[16px] rounded-full border-2 border-transparent border-t-[#D4AC0D] animate-[spin_0.7s_linear_infinite]"></span>
-                  </div>
-                  <div className="flex flex-col gap-2 text-left">
-                    <div className={`flex items-center gap-2 text-[0.85rem] transition-colors duration-500 ${loadingStep === 1 ? 'text-[#17A589]' : loadingStep > 1 ? 'text-[#BDC3C7]/60' : 'text-[#BDC3C7]/30'}`}>
-                      {loadingStep > 1 ? '✓' : loadingStep === 1 ? '→' : '○'} Calling Gemini to generate LaTeX
-                    </div>
-                    <div className={`flex items-center gap-2 text-[0.85rem] transition-colors duration-500 ${loadingStep === 2 ? 'text-[#17A589]' : loadingStep > 2 ? 'text-[#BDC3C7]/60' : 'text-[#BDC3C7]/30'}`}>
-                      {loadingStep > 2 ? '✓' : loadingStep === 2 ? '→' : '○'} Writing complex schemas...
-                    </div>
-                    <div className={`flex items-center gap-2 text-[0.85rem] transition-colors duration-500 ${loadingStep === 3 ? 'text-[#17A589]' : loadingStep > 3 ? 'text-[#BDC3C7]/60' : 'text-[#BDC3C7]/30'}`}>
-                      {loadingStep > 3 ? '✓' : loadingStep === 3 ? '→' : '○'} Validating formatting...
-                    </div>
-                    <div className={`flex items-center gap-2 text-[0.85rem] transition-colors duration-500 ${loadingStep === 4 ? 'text-[#17A589]' : loadingStep > 4 ? 'text-[#BDC3C7]/60' : 'text-[#BDC3C7]/30'}`}>
-                      {loadingStep > 4 ? '✓' : loadingStep === 4 ? '→' : '○'} Delivering payload
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {appState === "result" && (
-              <div 
-                key="result"
-                className="flex-1 flex flex-col items-stretch justify-start overflow-hidden h-full transition-opacity"
-              >
-                <div className="py-5 px-8 border-b border-[#2E86C1]/20 flex items-center justify-between bg-[#162230] shrink-0">
-                  <div>
-                    <h3 className="font-serif text-[1.2rem] text-white tracking-tight">{subject} Study Guide</h3>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <p className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[0.7rem] font-medium bg-[#17A589]/10 border border-[#17A589]/25 text-[#17A589]">
-                        ✓ Generated via Gemini API
-                      </p>
-                      {pdfBase64 && (
-                        <div className="flex bg-[#0D1B2A] rounded-md overflow-hidden border border-[#2E86C1]/30">
-                          <button onClick={() => setActiveTab("pdf")} className={`px-3 py-1 text-[0.75rem] font-medium transition-colors ${activeTab === 'pdf' ? 'bg-[#2E86C1]/20 text-[#2E86C1]' : 'text-[#BDC3C7]/70 hover:bg-[#2E86C1]/10'}`}>PDF View</button>
-                          <button onClick={() => setActiveTab("code")} className={`px-3 py-1 text-[0.75rem] font-medium transition-colors ${activeTab === 'code' ? 'bg-[#2E86C1]/20 text-[#2E86C1]' : 'text-[#BDC3C7]/70 hover:bg-[#2E86C1]/10'}`}>Code</button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <button onClick={downloadTex} className="px-4 py-2 rounded-lg font-semibold text-[0.82rem] transition-all border border-[#2E86C1]/20 text-[#BDC3C7] hover:border-[#2E86C1] hover:text-[#2E86C1] hover:bg-[#2E86C1]/5 shadow-sm">
-                      ⬇ Download .tex
-                    </button>
-                    {pdfBase64 && (
-                      <button onClick={downloadPdf} className="px-4 py-2 rounded-lg font-semibold text-[0.82rem] transition-all bg-gradient-to-br from-[#2E86C1] to-[#17A589] text-white shadow-[0_2px_12px_rgba(23,165,137,0.2)] hover:opacity-90 hover:-translate-y-px">
-                        ⬇ PDF
-                      </button>
-                    )}
-                  </div>
-                </div>
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-[#091018] relative">
-                  {!pdfBase64 || activeTab === 'code' ? (
-                    <pre className="font-mono text-[0.78rem] text-[#8BB8D4] leading-relaxed whitespace-pre-wrap break-words selection:bg-[#2E86C1]/30 selection:text-white">
-                      {texSource}
-                    </pre>
-                  ) : (
-                    <iframe 
-                      src={`data:application/pdf;base64,${pdfBase64}`} 
-                      className="w-full h-full rounded border border-[#2E86C1]/20"
-                      title="PDF Preview"
-                    />
-                  )}
-                </div>
-              </div>
-            )}
-
-            {appState === "error" && (
-              <div 
-                key="error"
-                className="flex-1 flex flex-col items-center justify-center p-12 text-center transition-opacity"
-              >
-                <div className="bg-[#C0392B]/10 border border-[#C0392B]/30 rounded-xl p-6 md:p-8 text-left max-w-lg w-full shadow-[0_0_30px_rgba(192,57,43,0.1)]">
-                  <h3 className="text-[#C0392B] text-[1.1rem] font-semibold mb-2 flex items-center gap-2">⚠ Generation Failed</h3>
-                  <p className="text-[#BDC3C7] text-[0.85rem] mb-4 opacity-80">The server encountered an error parsing your request.</p>
-                  <pre className="font-mono text-[0.72rem] text-[#BDC3C7]/90 whitespace-pre-wrap bg-black/30 p-4 rounded-lg border border-black/50 overflow-x-auto">
-                    {errorText}
-                  </pre>
-                  <button onClick={() => setAppState("empty")} className="mt-6 px-5 py-2.5 bg-transparent border border-[#C0392B]/50 text-[#C0392B] rounded-lg text-[0.85rem] font-medium hover:bg-[#C0392B]/10 hover:border-[#C0392B] transition-colors shadow-sm">
-                    ← Try Again
+                    {fullSyllabus ? '✨ FULL GRADE 12 CURRICULUM SELECTED' : 'Auto-Generate Full Grade 12 Curriculum'}
                   </button>
                 </div>
-              </div>
-            )}
 
-        </div>
+                <div className={`flex flex-col gap-2.5 transition-all duration-500 ${fullSyllabus ? 'opacity-20 pointer-events-none scale-[0.98]' : 'opacity-100'}`}>
+                  <label className="text-xs font-bold tracking-widest uppercase text-white/50 pl-1">Specific Topics</label>
+                  <div 
+                    className="w-full bg-black/20 border border-white/10 rounded-2xl p-2.5 min-h-[64px] flex flex-wrap gap-2 cursor-text focus-within:border-white/40 focus-within:bg-black/40 transition-all shadow-inner"
+                    onClick={() => document.getElementById('topic-input')?.focus()}
+                  >
+                    {topics.map((t, i) => (
+                      <div key={i} className="bg-white/10 border border-white/30 rounded-[10px] py-1 px-2.5 text-xs text-white flex items-center gap-2">
+                        {t}
+                        <button onClick={(e) => { e.stopPropagation(); removeTopic(i); }} className="text-white/40 hover:text-white transition-colors text-base leading-none mt-[-1px]">×</button>
+                      </div>
+                    ))}
+                    <input 
+                      id="topic-input"
+                      type="text"
+                      className="bg-transparent border-none outline-none text-white text-base flex-1 min-w-[150px] p-1.5 placeholder:text-white/20"
+                      placeholder={topics.length === 0 ? "Add specific chapters..." : ""}
+                      value={topicInput}
+                      onChange={(e) => setTopicInput(e.target.value)}
+                      onKeyDown={handleTopicKeyDown}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6 relative z-10">
+                <div className="flex flex-col gap-2.5">
+                  <label className="text-xs font-bold tracking-widest uppercase text-white/50 pl-1">Square 1 Injection (OCR)</label>
+                  <div className="relative group w-full bg-black/20 border-2 border-dashed border-white/10 hover:border-white/30 hover:bg-black/40 rounded-2xl p-5 text-center transition-all cursor-pointer shadow-inner overflow-hidden">
+                    <input 
+                      type="file" 
+                      multiple 
+                      onChange={handleFileUpload} 
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      accept="application/pdf,image/*,text/plain"
+                    />
+                    <div className="opacity-60 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-1.5">
+                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                       <span className="font-medium text-sm">Drop class notes, syllabus, or slides</span>
+                    </div>
+                  </div>
+                  {files.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {files.map((f, i) => (
+                        <div key={i} className="flex items-center gap-2 bg-white/10 border border-white/10 rounded-lg px-2.5 py-1.5">
+                          <span className="text-[11px] font-medium text-white/80 truncate max-w-[120px]">{f.name}</span>
+                          <button onClick={() => removeFile(i)} className="text-white/40 hover:text-white text-sm leading-none">×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex flex-col gap-2.5">
+                  <label className="text-xs font-bold tracking-widest uppercase text-white/50 pl-1">Engine</label>
+                  <div className="relative">
+                    <select 
+                      className="w-full bg-black/20 border border-white/10 rounded-2xl py-3 px-4 text-white/90 text-base md:text-lg font-medium outline-none focus:border-white/40 focus:bg-black/40 transition-all shadow-inner appearance-none cursor-pointer"
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                    >
+                      <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro (Heavy Logic/HQ OCR)</option>
+                      <option value="gemini-3-flash-preview">Gemini 3 Flash (Fast)</option>
+                      <option value="gemma-4">Gemma 4 (Local/Open)</option>
+                    </select>
+                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/40">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2 mt-1">
+                    <label className="text-xs font-bold tracking-widest uppercase text-white/50 pl-1">Custom Directives</label>
+                    <input 
+                      type="text" 
+                      className="w-full bg-black/20 border border-white/10 rounded-2xl py-2.5 px-4 text-white text-sm md:text-base font-medium outline-none placeholder:text-white/20 focus:border-white/40 focus:bg-black/40 transition-all shadow-inner"
+                      value={extraRules}
+                      onChange={(e) => setExtraRules(e.target.value)}
+                      placeholder="e.g. Include SI Unit conversions..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2 relative z-10">
+                 <button 
+                  onClick={generate}
+                  className="w-full bg-white text-black py-4 rounded-[1.25rem] font-black text-lg tracking-wide uppercase hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(255,255,255,0.4)] active:scale-[0.98] transition-all transform shadow-2xl"
+                >
+                  Construct Guide
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* State: Loading */}
+        {appState === "loading" && (
+          <div className="flex flex-col items-center justify-center animate-fade-in relative z-10 w-full max-w-xl">
+             <div className="w-32 h-32 relative flex items-center justify-center mb-10">
+                <div className="absolute inset-0 border-t-2 border-white/80 rounded-full animate-spin"></div>
+                <div className="absolute inset-2 border-l-2 border-white/40 rounded-full animate-[spin_1.5s_linear_infinite_reverse]"></div>
+                <div className="absolute inset-4 bg-white/10 rounded-full shadow-[inset_0_0_20px_rgba(255,255,255,0.2)]"></div>
+             </div>
+             
+             <div className="w-full bg-transparent border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] rounded-3xl p-6 flex flex-col gap-3 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.01] pointer-events-none rounded-3xl" />
+                <div className="relative z-10 text-xs font-bold tracking-widest uppercase text-white/40 mb-1">System Trace</div>
+                <div className={`text-base font-medium tracking-tight transition-all duration-700 ${loadingStep >= 1 ? 'text-white' : 'text-white/20'}`}>
+                  {loadingStep > 1 ? '✓' : '→'} Synthesizing curriculum topology
+                </div>
+                <div className={`text-base font-medium tracking-tight transition-all duration-700 ${loadingStep >= 2 ? 'text-white' : 'text-white/20'}`}>
+                  {loadingStep > 2 ? '✓' : loadingStep === 2 ? '→' : '·'} Writing structural LaTeX schemas
+                </div>
+                <div className={`text-base font-medium tracking-tight transition-all duration-700 ${loadingStep >= 3 ? 'text-white' : 'text-white/20'}`}>
+                  {loadingStep > 3 ? '✓' : loadingStep === 3 ? '→' : '·'} Validating strict BAC exam formats
+                </div>
+                <div className={`text-base font-medium tracking-tight transition-all duration-700 ${loadingStep >= 4 ? 'text-white' : 'text-white/20'}`}>
+                  {loadingStep > 4 ? '✓' : loadingStep === 4 ? '→' : '·'} Establishing PDF render pipeline
+                </div>
+             </div>
+          </div>
+        )}
+
+        {/* State: Result (Massive Split/Centered View) */}
+        {appState === "result" && (
+          <div className="w-full max-w-[1400px] h-[90vh] flex flex-col gap-6 animate-fade-in relative z-10">
+            
+            {/* Nav Header */}
+            <div className="w-full bg-transparent border border-white/20 rounded-[1.5rem] p-3 px-6 flex items-center justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.01] pointer-events-none rounded-[1.5rem]" />
+              <div className="flex items-center gap-5 relative z-10">
+                <button onClick={() => setAppState("empty")} className="text-white/50 hover:text-white transition-colors bg-white/5 px-3 py-1.5 text-sm rounded-lg font-medium tracking-tight border border-white/5">
+                  ← Back
+                </button>
+                <div className="w-px h-5 bg-white/10"></div>
+                <h2 className="text-xl font-black tracking-tight text-white/90 uppercase">{subject} <span className="opacity-30">| GUIDE</span></h2>
+              </div>
+              
+              <div className="flex items-center gap-3 relative z-10">
+                {pdfBase64 && (
+                  <div className="flex bg-black/40 rounded-lg p-1 border border-white/20 shadow-inner">
+                    <button 
+                      onClick={() => setActiveTab("pdf")} 
+                      className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'pdf' ? 'bg-white text-black shadow-md' : 'text-white/50 hover:text-white'}`}
+                    >
+                      PDF
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab("code")} 
+                      className={`px-4 py-1.5 rounded-md text-xs font-bold transition-all ${activeTab === 'code' ? 'bg-white text-black shadow-md' : 'text-white/50 hover:text-white'}`}
+                    >
+                      TeX Code
+                    </button>
+                  </div>
+                )}
+                
+                <div className="w-px h-5 bg-white/10 mx-1 hidden md:block"></div>
+                
+                <button 
+                  onClick={downloadTex} 
+                  className="px-4 py-2 rounded-lg border border-white/20 text-xs text-white/80 hover:bg-white hover:text-black font-bold transition-all shadow-sm hidden md:block"
+                >
+                  .tex
+                </button>
+                {pdfBase64 && (
+                  <button 
+                    onClick={downloadPdf} 
+                    className="px-4 py-2 rounded-lg bg-white text-black text-xs font-bold hover:scale-[1.03] transition-transform shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                  >
+                     Save PDF
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 w-full bg-transparent border border-white/20 rounded-[2rem] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] relative">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.01] pointer-events-none" />
+              <div className="relative z-10 w-full h-full">
+                {(!pdfBase64 || activeTab === 'code') ? (
+                <div className="w-full h-full overflow-y-auto p-8 custom-scrollbar">
+                  <pre className="font-mono text-sm md:text-base text-white/70 leading-relaxed whitespace-pre-wrap break-words selection:bg-white/20 selection:text-white">
+                    {texSource}
+                  </pre>
+                </div>
+              ) : (
+                <iframe 
+                  src={`data:application/pdf;base64,${pdfBase64}#toolbar=0`} 
+                  className="w-full h-full opacity-90 mix-blend-lighten filter contrast-125"
+                  title="PDF Preview"
+                />
+              )}
+              </div>
+            </div>
+
+          </div>
+        )}
+
+        {/* State: Error */}
+        {appState === "error" && (
+          <div className="w-full max-w-2xl bg-transparent border border-red-500/50 shadow-[0_0_50px_rgba(239,68,68,0.25)] rounded-[2rem] p-10 flex flex-col gap-6 animate-fade-in relative z-10 text-center items-center overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-red-500/[0.08] to-transparent pointer-events-none" />
+            <div className="relative z-10 w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center text-red-500 text-3xl font-bold mb-2 border border-red-500/20">
+              !
+            </div>
+            <h2 className="relative z-10 text-3xl font-black tracking-tight text-white">System Error</h2>
+            <div className="relative z-10 w-full text-red-400/90 text-sm md:text-base font-medium whitespace-pre-wrap bg-red-950/30 p-6 rounded-2xl border border-red-900/50">
+              {errorText}
+            </div>
+            <button 
+              onClick={() => setAppState("empty")} 
+              className="relative z-10 mt-4 px-8 py-4 bg-white text-black font-bold text-lg rounded-xl hover:scale-105 transition-transform"
+            >
+              Reset Terminal
+            </button>
+          </div>
+        )}
+
       </main>
       
       <style dangerouslySetInnerHTML={{__html: `
-        @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600;700&display=swap');
-        .font-outfit { font-family: 'Outfit', sans-serif; }
-        .font-serif { font-family: 'DM Serif Display', serif; }
-        .font-mono { font-family: 'DM Mono', monospace; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(46,134,193,0.25); border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(46,134,193,0.4); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        
+        body { background: #000; }
+        .font-sans { font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255,255,255,0.02); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+
+        @keyframes blob {
+          0% { transform: translate(0px, 0px) scale(1); }
+          33% { transform: translate(30px, -50px) scale(1.1); }
+          66% { transform: translate(-20px, 20px) scale(0.9); }
+          100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 15s infinite alternate ease-in-out; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
       `}} />
     </div>
   );

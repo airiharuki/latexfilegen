@@ -2,33 +2,29 @@
 
 **Because crying over past papers is a rite of passage, but formatting your study notes shouldn't be.**
 
-Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Baccalaureate (BAC) exam. Powered by Gemini, this app takes your desperate plea for knowledge (e.g., "Subject: Math, Topics: Integration") and transmutes it into beautifully formatted, battle-ready LaTeX (`.tex`) code. 
+Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Baccalaureate (BAC) exam. Powered by Google's GenAI and pure, unfiltered panic, this app takes your desperate 3:00 AM pleas for knowledge (e.g., "Subject: Math, Topics: Integration", "Rule: Explain it like my exam is tomorrow") and transmutes them into beautifully formatted, battle-ready LaTeX (`.tex`) code. All wrapped in a sleek "Liquid Glass" interface, so at least your screen looks good while you question your life choices.
 
 ## What does it actually do?
-1. **You tell it what you need to study.** (e.g., "Physics: Kinematics" + "Extra rule: Explain it like I have 5 minutes until the exam").
-2. **The AI does the heavy lifting.** It generates a comprehensive, meticulously structured study guide packed with definitions, formulas, warnings, and strategies.
-3. **You get raw, unfiltered LaTeX.** No weird Markdown artifacts. Just pure `.tex` goodness ready to be compiled into a gorgeous PDF.
-
-## Why did we build this?
-Because using L'Hôpital's Rule on the BAC exam is illegal, and someone needs to remind you before you lose 15 points. Our AI is specifically instructed to *yell at you* in a nicely formatted `\warn{}` box if you try to use university-level calculus shortcuts. 
+1. **You tell it what to do.** (e.g., "Physics: Kinematics". "Rule: Pretend I am 5 years old but still need to pass the BAC").
+2. **The AI does the heavy lifting.** It churns out a meticulous study guide packed with definitions, formulas, and strategies. It basically spoon-feeds you knowledge.
+3. **You get raw, unadulterated LaTeX.** No weird Markdown artifacts. Just pure `.tex` code ready to be compiled into a gorgeous PDF. Because real students suffer through LaTeX compilation.
 
 ## Features 🚀
-* **Remote PDF Compilation:** Native LaTeX is heavy. We pipe the output straight into an external texlive compiler and serve you the live PDF directly in the browser!
-* **"Square 1" File Upload (OCR):** Have terrible handwriting or 50 slides you didn't read? Drag and drop your PDFs, photos, or text files into the *Square 1* file uploader. Powered by Gemini 3.1 Pro's multi-modal OCR, it reads your messy notes and transforms them into organized cheat sheets.
-* **Full Grade 12 Syllabus Mode:** Don't even want to type the topics? Just hit the "Auto-generate Full Grade 12 Curriculum" toggle. It'll automatically tell Gemini to outline and map out the entire standard Cambodian Grade 12 syllabus for that subject.
-* **Dark Mode UI:** Because let's be honest, you're only using this at 3:00 AM.
-* **Strict BAC Guidelines:** It knows what you can and can't do on the exam. (Seriously, stop trying to use the Tabular DI method).
-* **Copy-Paste Ready:** Download the generated PDF right away or pull the raw `.tex` to tweak on [Overleaf](https://www.overleaf.com/).
-* **100% BS-Free Output:** The app spits out nothing but pure LaTeX. No introductory chat filler like *"Here is your study guide! I hope it helps!"* 🤖 Just code.
+* **Model Selection Engine:** Choose your fighter. Toggle between **Gemini 3.1 Pro** for heavy logic, **Gemini 3 Flash** for when the exam starts in 10 minutes, or **Gemma 4** for access via open weights! (Because we love open source shits in this house 🏡)
+* **Liquid Glass Interface:** An insanely unnecessary but absolutely gorgeous visual aesthetic. Fluid, crystal-clear glassmorphism with VHS grain. If you're going to fail, fail *aesthetic*.
+* **Remote PDF Compilation:** Installing LaTeX takes an entire hard drive and parts of your soul. We pipe the output straight into an external texlive compiler and serve you the live PDF directly.
+* **"Square 1" File Upload (OCR):** Handwriting looks like a doctor having a stroke? Skipped 50 slides? Drop them in the *Square 1* uploader. Gemini will decipher your terrible handwriting and turn it into a pristine cheat sheet.
+* **Full Syllabus Mode:** Don't even know what you don't know? Hit the "Auto-generate" toggle. The AI will psychically deduce the standard Grade 12 syllabus and map it out.
+* **Strict BAC Guidelines:** It knows the Ministry's rules. Seriously, if you try to use L'Hôpital's Rule, it will aggressively format a `\warn{}` box to remind you that the grading committee hates happiness.
+* **100% BS-Free Output:** The app spits out nothing but pure code. No AI filler like *"Here is your study guide! I hope you ace your test to become a productive member of society!"* 🤖 Just math.
 
 ## How to use 🛠️
-1. Install dependencies: `npm install`
-2. Set your Google Gemini API key: Create a `.env` file and add `GEMINI_API_KEY=your_key_here`
-3. Run the dev server: `npm run dev`
-4. Type in your subject and topics.
-5. Hit **Generate**.
-6. Download the `.tex` file.
-7. Print it out. **Close your laptop.** Go actually study.
+1. Clone this bad boy and run `npm install`.
+2. Offer your Google Gemini API key to the `.env` gods: `GEMINI_API_KEY=your_key_here`
+3. Start the dev server: `npm run dev`
+4. Pick your engine, type in your subject, and hit **Construct Guide**.
+5. Switch seamlessly between raw code and compiled PDF views.
+6. Print it out. **Close your laptop.** Go actually study. Seriously, get off the internet.
 
 ## Disclaimer ⚠️
-StudyForge generates the *guide*. It cannot generate the *motivation* to actually read it, nor can it take the exam for you. May the curve be ever in your favor. Good luck! 🍀
+StudyForge generates the *guide*. It cannot generate the *motivation* to read it, nor can it absorb the knowledge into your brain via osmosis. May the curve be ever in your favor. 🍀

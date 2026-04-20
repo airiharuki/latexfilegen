@@ -335,7 +335,7 @@ async function startServer() {
 
   app.post('/api/generate', async (req, res) => {
     try {
-      const { subject, topics, extra_rules, files, full_syllabus } = req.body;
+      const { subject, topics, extra_rules, files, full_syllabus, model } = req.body;
       if (!subject) {
         return res.status(400).json({ detail: "Missing subject" });
       }
@@ -347,7 +347,12 @@ async function startServer() {
       if (!apiKey) {
         return res.status(500).json({ detail: "Gemini API key not configured on server" });
       }
+      if (apiKey === "MY_GEMINI_API_KEY") {
+        return res.status(500).json({ detail: "API key is still set to the default placeholder 'MY_GEMINI_API_KEY'. Please update the Secrets panel with your real Google AI Studio key." });
+      }
+      
       const ai = new GoogleGenAI({ apiKey });
+      const aiModel = model || 'gemini-3.1-pro-preview';
 
       const topic_instruction = full_syllabus 
         ? "Topics to cover: The ENTIRE standard Cambodian Grade 12 curriculum for this subject. Outline and exhaustively cover all major chapters required for the BAC exam."
@@ -384,7 +389,7 @@ No markdown fences. No explanation.`;
       console.log("Generating for:", subject, topics, "With files:", files ? files.length : 0);
 
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-pro-preview', // Requested by user & highly capable of OCR/Multimodal
+        model: aiModel,
         contents: contents,
         config: {
           systemInstruction: SYSTEM_PROMPT,
@@ -427,7 +432,11 @@ No markdown fences. No explanation.`;
 
     } catch (error: any) {
       console.error(error);
-      res.status(500).json({ detail: error.message || "Internal Server Error" });
+      const isApiKeyErr = error.message && error.message.includes("API key not valid");
+      const msg = isApiKeyErr 
+        ? "Your Gemini API Key is invalid. Please double check the key in the Settings -> Secrets panel."
+        : (error.message || "Internal Server Error");
+      res.status(500).json({ detail: msg });
     }
   });
 
