@@ -20,19 +20,17 @@ Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Bacca
 
 ## Installation & Setup 🛠️
 
-### The "My Exam is Tomorrow" Install (Automatic)
-We wrote scripts to bootstrap your dependencies and optionally download the **Gemma 4** local model via Ollama. Just run them and go cram.
+### The "My Exam is Tomorrow" Install (Automatic / Online Mode)
+We wrote scripts to instantly download the project, bootstrap your dependencies, and optionally fetch the **Gemma 4** local model via Ollama. Just run the one-liner for your OS from anywhere in your terminal and let it cook.
 
 **macOS & Linux:**
 ```bash
-chmod +x install.sh
-./install.sh
+curl -fsSL https://raw.githubusercontent.com/airiharuki/latexfilegen/main/install.sh | bash
 ```
 
-**Windows:**
-Right-click `install.ps1` and select **Run with PowerShell**, or from a terminal:
+**Windows (Run in PowerShell):**
 ```powershell
-.\install.ps1
+irm https://raw.githubusercontent.com/airiharuki/latexfilegen/main/install.ps1 | iex
 ```
 
 ### The "I Like Doing Things the Hard Way" Install (Manual)

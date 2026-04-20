@@ -1,10 +1,30 @@
 #!/bin/bash
 
 # StudyForge Setup Script (macOS / Linux)
-# This script is fully automatic. It gets Node running, starts Ollama in the background, and yanks Gemma 4 down.
+# This script is fully automatic. It clones the repo, gets Node running, starts Ollama in the background, and yanks Gemma 4 down.
 
 echo "🚀 Bootstrapping StudyForge..."
 echo ""
+
+# 0. Check for Git and Clone
+if ! command -v git &> /dev/null; then
+    echo "❌ ERROR: Git is not installed."
+    echo "Please install Git first."
+    exit 1
+fi
+
+if [ ! -f "package.json" ]; then
+    REPO_URL="https://github.com/airiharuki/latexfilegen.git"
+    TARGET_DIR="latexfilegen"
+    
+    echo "📦 Cloning repository from $REPO_URL..."
+    git clone "$REPO_URL" "$TARGET_DIR"
+    
+    echo "📂 Switching to $TARGET_DIR directory..."
+    cd "$TARGET_DIR" || exit 1
+else
+    echo "✅ Repository files found locally."
+fi
 
 # 1. Check for Node.js
 if ! command -v npm &> /dev/null; then
