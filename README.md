@@ -35,26 +35,34 @@ irm https://raw.githubusercontent.com/airiharuki/latexfilegen/main/install.ps1 |
 
 ### The "I Like Doing Things the Hard Way" Install (Manual)
 
-**1. macOS**
+**Step 1: Grab the code**
+```bash
+git clone https://github.com/airiharuki/latexfilegen.git
+cd latexfilegen
+```
+
+**Step 2: OS-Specific Dependencies**
+
+**macOS**
 * Install [Node.js](https://nodejs.org/) (we recommend `nvm` or `brew install node`).
 * *Optional for open-source mode:* Install [Ollama](https://ollama.com/download/mac).
 * Open terminal and run `ollama pull gemma4`.
-* Clone this repo, run `npm install`.
-* Start it: `npm run dev`
 
-**2. Linux (Debian/Ubuntu)**
-* `sudo apt update && sudo apt install nodejs npm`
+**Linux (Debian/Ubuntu)**
+* `sudo apt update && sudo apt install nodejs npm git`
 * *Optional for open-source mode:* `curl -fsSL https://ollama.com/install.sh | sh`
 * `ollama pull gemma4`
-* `npm install`
-* `npm run dev`
 
-**3. Windows**
+**Windows**
 * Download and install [Node.js](https://nodejs.org/).
 * *Optional for open-source mode:* Open Terminal and run `winget install Ollama.Ollama`. Close/reopen terminal.
 * `ollama pull gemma4`
-* `npm install`
-* `npm run dev`
+
+**Step 3: Build & Run**
+```bash
+npm install
+npm run dev
+```
 
 ## Bring Your Own Keys 🔑
 If you are using the cloud-based **Gemini 3.1 Pro** or **Flash** engines (because you physically don't have the RAM to run Gemma 4 locally), you need a key.
