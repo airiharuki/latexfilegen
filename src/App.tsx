@@ -145,7 +145,7 @@ export default function App() {
         <div className="absolute bottom-[-20%] left-[20%] w-[70vw] h-[70vw] rounded-full mix-blend-screen filter blur-[140px] opacity-20 animate-blob animation-delay-4000 bg-gradient-to-r from-rose-500 to-orange-500"></div>
       </div>
 
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center min-h-screen p-4 md:p-8">
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center w-full p-4 md:p-8">
         
         {/* State: Empty - In Your Face Glass Form */}
         {appState === "empty" && (
@@ -312,7 +312,7 @@ export default function App() {
 
         {/* State: Result (Massive Split/Centered View) */}
         {appState === "result" && (
-          <div className="w-full max-w-[1400px] h-[90vh] flex flex-col gap-6 animate-fade-in relative z-10">
+          <div className="w-full max-w-[1400px] flex-1 flex flex-col gap-4 md:gap-6 animate-fade-in relative z-10 min-h-[400px]">
             
             {/* Nav Header */}
             <div className="w-full bg-transparent border border-white/20 rounded-[1.5rem] p-3 px-6 flex items-center justify-between shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] relative overflow-hidden">
@@ -363,7 +363,7 @@ export default function App() {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 w-full bg-transparent border border-white/20 rounded-[2rem] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] relative">
+            <div className="flex-1 w-full bg-transparent border border-white/20 rounded-[2rem] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] relative min-h-[400px]">
               <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-white/[0.01] pointer-events-none" />
               <div className="relative z-10 w-full h-full">
                 {(!pdfBase64 || activeTab === 'code') ? (
