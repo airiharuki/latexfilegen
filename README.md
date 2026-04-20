@@ -12,7 +12,9 @@ Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Bacca
 ## Features 🚀
 * **Model Selection Engine:** Choose your fighter. Toggle between **Gemini 3.1 Pro** for heavy logic, **Gemini 3 Flash** for when the exam starts in 10 minutes, or **Gemma 4** for access via open weights! (Because we love open source shits in this house 🏡)
 * **Liquid Glass Interface:** An insanely unnecessary but absolutely gorgeous visual aesthetic. Fluid, crystal-clear glassmorphism with VHS grain. If you're going to fail, fail *aesthetic*.
-* **Remote PDF Compilation:** Installing LaTeX takes an entire hard drive and parts of your soul. We pipe the output straight into an external texlive compiler and serve you the live PDF directly.
+* **Intelligent PDF Compilation:** The app operates on true dual-mode logic. 
+  - **Local/Offline:** If you're running Gemma 4 offline and have `texlive` (`xelatex`) installed on your system, it compiles the PDF natively using `child_process`.
+  - **Remote (Fallback):** Don't have a 6GB LaTeX installation lying around? The app dynamically falls back to piping the `.tex` output straight to an external texlive API. *(Note: Using this cloud fallback while running the "offline" Gemma 4 mode is highly unrecommended, as it completely defeats the purpose of an isolated, offline privacy stack. Install MiKTeX or MacTeX if you want to stay off the grid!)*
 * **Lecture BS You Ignored (OCR):** Handwriting looks like a doctor having a stroke? Zoned out for 50 slides? Drop them in this uploader. Gemini will decipher your professor's unhinged yapping and your terrible notes, turning them into a pristine cheat sheet.
 * **Full Syllabus Mode:** Don't even know what you don't know? Hit the "Auto-generate" toggle. The AI will psychically deduce the standard Grade 12 syllabus and map it out.
 * **Strict BAC Guidelines:** It knows the Ministry's rules. Seriously, if you try to use L'Hôpital's Rule, it will aggressively format a `\warn{}` box to remind you that the grading committee hates happiness.
@@ -20,12 +22,22 @@ Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Bacca
 
 ## Installation & Setup 🛠️
 
-### The "My Exam is Tomorrow" Install (Automatic / Online Mode)
-We wrote scripts to instantly download the project, bootstrap your dependencies, and optionally fetch the **Gemma 4** local model via Ollama. Just run the one-liner for your OS from anywhere in your terminal and let it cook.
+### The "I Only Have a Phone" Setup (iOS & Android)
+If you're cramming from an iPhone or Android because you left your laptop at home, **do not attempt to run these scripts.** Just use the live, deployed web application! 
+Because we built the **Remote PDF Compilation** API fallback, the server handles all the massive LaTeX compilation for you in the cloud. No 8GB `texlive` installation needed on your phone. Just open the browser, tap "Construct Guide", and get your PDF.
 
-**macOS & Linux:**
+### The "My Exam is Tomorrow" Install (Automatic / Online Mode)
+We wrote scripts to instantly download the project, bootstrap your dependencies, and optionally fetch the **Gemma 4** local model via Ollama. 
+*Note: During execution, the scripts will optionally ask if you want to install MacTeX/TeX Live/MiKTeX for true local offline PDF generation. If your internet is slow, just hit 'N' and the app will use our Cloud Compiler fallback automatically!*
+
+**macOS:**
 ```bash
-curl -fsSL https://raw.githubusercontent.com/airiharuki/latexfilegen/main/install.sh | bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/airiharuki/latexfilegen/main/install_mac.sh)"
+```
+
+**Linux (Debian/Ubuntu):**
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/airiharuki/latexfilegen/main/install_linux.sh)"
 ```
 
 **Windows (Run in PowerShell):**
@@ -47,16 +59,19 @@ cd latexfilegen
 * Install [Node.js](https://nodejs.org/) (we recommend `nvm` or `brew install node`).
 * *Optional for open-source mode:* Install [Ollama](https://ollama.com/download/mac).
 * Open terminal and run `ollama pull gemma4`.
+* *Optional for true local PDF compilation:* `brew install --cask mactex-no-gui` OR `brew install --cask miktex`
 
 **Linux (Debian/Ubuntu)**
 * `sudo apt update && sudo apt install nodejs npm git`
 * *Optional for open-source mode:* `curl -fsSL https://ollama.com/install.sh | sh`
 * `ollama pull gemma4`
+* *Optional for true local PDF compilation:* `sudo apt-get install texlive-xetex texlive-latex-extra texlive-science texlive-fonts-recommended`
 
 **Windows**
 * Download and install [Node.js](https://nodejs.org/).
 * *Optional for open-source mode:* Open Terminal and run `winget install Ollama.Ollama`. Close/reopen terminal.
 * `ollama pull gemma4`
+* *Optional for true local PDF compilation:* `winget install MiKTeX.MiKTeX` OR `winget install GNU.TeXLive`
 
 **Step 3: Build & Run**
 ```bash

@@ -4,6 +4,9 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import fs from "fs";
+import os from "os";
+import { exec, execSync } from "child_process";
+import crypto from "crypto";
 
 // Load prompt
 const SYSTEM_PROMPT = `You are a LaTeX document generator specializing in creating beautiful, printable academic study guides for the Cambodian Baccalaureate (BAC) exam. You output ONLY raw LaTeX source code — no markdown, no code fences, no explanation, no preamble text. Just the .tex file contents, starting with \\documentclass and ending with \\end{document}.
@@ -295,7 +298,48 @@ OUTPUT FORMAT
 
 When you receive a user request, generate the complete .tex file for that study guide immediately.`;
 
+async function hasLocalXelatex(): Promise<boolean> {
+  return new Promise((resolve) => {
+    exec("xelatex -version", (error) => {
+      resolve(!error);
+    });
+  });
+}
+
+async function compilePdfLocal(tex: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const tmpDir = os.tmpdir();
+    const jobId = crypto.randomUUID();
+    const texPath = path.join(tmpDir, `${jobId}.tex`);
+    const pdfPath = path.join(tmpDir, `${jobId}.pdf`);
+
+    fs.writeFileSync(texPath, tex);
+
+    // Run xelatex in non-stop mode. Run twice for ToC if needed, but once is usually enough for quick preview.
+    console.log("Compiling PDF locally via xelatex...");
+    exec(`xelatex -interaction=nonstopmode -output-directory=${tmpDir} ${texPath}`, (error) => {
+      // It might have an error on some environments but still produce a PDF
+      if (fs.existsSync(pdfPath)) {
+        const pdfBuffer = fs.readFileSync(pdfPath);
+        resolve(pdfBuffer.toString("base64"));
+        
+        // Cleanup
+        try {
+          fs.unlinkSync(texPath);
+          fs.unlinkSync(pdfPath);
+          fs.unlinkSync(path.join(tmpDir, `${jobId}.aux`));
+          fs.unlinkSync(path.join(tmpDir, `${jobId}.log`));
+        } catch(e) {}
+      } else {
+        console.error("Local compilation failed, PDF not generated.", error?.message);
+        resolve(null);
+      }
+    });
+  });
+}
+
 async function compilePdfRemote(tex: string): Promise<string | null> {
+  console.log("Attempting remote compilation via texlive.net...");
   try {
     const form = new FormData();
     form.append('filecontents[]', new Blob([tex]), 'document.tex');
@@ -320,6 +364,16 @@ async function compilePdfRemote(tex: string): Promise<string | null> {
     console.error("Error calling remote LaTeX compiler:", err);
     return null;
   }
+}
+
+async function compilePdf(tex: string): Promise<string | null> {
+  // Try local first for true offline usage
+  if (await hasLocalXelatex()) {
+    const localBase64 = await compilePdfLocal(tex);
+    if (localBase64) return localBase64;
+  }
+  // Fallback to remote
+  return await compilePdfRemote(tex);
 }
 
 async function startServer() {
@@ -420,8 +474,7 @@ No markdown fences. No explanation.`;
       raw_tex = raw_tex.substring(0, lastIdx + endTag.length);
 
       // Now attempt PDF compilation
-      console.log("Attempting remote compilation via texlive.net...");
-      let pdfBase64 = await compilePdfRemote(raw_tex);
+      let pdfBase64 = await compilePdf(raw_tex);
 
       res.json({
         success: true,

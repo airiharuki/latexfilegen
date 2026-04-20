@@ -1,12 +1,27 @@
 #!/bin/bash
 
-# StudyForge Setup Script (macOS / Linux)
-# This script is fully automatic. It clones the repo, gets Node running, starts Ollama in the background, and yanks Gemma 4 down.
+# StudyForge Setup Script (Linux)
+# This script is fully automatic. It gets Node running, asks about TeX Live, starts Ollama in the background, and yanks Gemma 4 down.
 
-echo "🚀 Bootstrapping StudyForge..."
+echo "🚀 Bootstrapping StudyForge for Linux..."
 echo ""
 
-# 0. Check for Git and Clone
+# 0. Prompt for TeX Live
+read -p "📄 Do you want to install TeX Live for local, offline PDF generation? (WARNING: ~1.5GB download) [y/N]: " -n 1 -r < /dev/tty
+echo ""
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    if ! command -v apt-get &> /dev/null; then
+        echo "❌ apt-get not found. You will need to install texlive manually using your package manager."
+    else
+        echo "📦 Installing TeX Live packages..."
+        sudo apt-get update && sudo apt-get install -y texlive-xetex texlive-latex-extra texlive-science texlive-fonts-recommended
+    fi
+else
+    echo "⏭️ Skipping TeX Live. (Cloud compiler fallback will be used - NOT RECOMMENDED for offline privacy setups)"
+fi
+echo ""
+
+# 1. Check for Git and Clone
 if ! command -v git &> /dev/null; then
     echo "❌ ERROR: Git is not installed."
     echo "Please install Git first."
@@ -26,7 +41,7 @@ else
     echo "✅ Repository files found locally."
 fi
 
-# 1. Check for Node.js
+# 2. Check for Node.js
 if ! command -v npm &> /dev/null; then
     echo "❌ ERROR: Node.js and npm are not installed."
     echo "Please install Node.js (v18+) from https://nodejs.org/ first."
@@ -34,7 +49,7 @@ if ! command -v npm &> /dev/null; then
 fi
 echo "✅ Node.js found."
 
-# 2. Check for Ollama
+# 3. Check for Ollama
 if ! command -v ollama &> /dev/null; then
     echo "🛠️ Ollama not found. Installing automatically..."
     curl -fsSL https://ollama.com/install.sh | sh
@@ -42,18 +57,12 @@ else
     echo "✅ Ollama is already installed."
 fi
 
-# 3. Start daemon & Pull Gemma 4
+# 4. Start daemon & Pull Gemma 4
 if command -v ollama &> /dev/null; then
     echo "⚙️ Starting Ollama daemon in the background..."
     
-    # Try starting the service gracefully, send output to void
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS handles serve heavily via the app, but we can try spinning the CLI
-        ollama serve >/dev/null 2>&1 &
-    else
-        # Linux systemd (if applicable) or fallback
-        sudo systemctl start ollama >/dev/null 2>&1 || ollama serve >/dev/null 2>&1 &
-    fi
+    # Try systemd first, fallback to basic spin
+    sudo systemctl start ollama >/dev/null 2>&1 || ollama serve >/dev/null 2>&1 &
 
     # Give it a second to wake up
     sleep 3
@@ -63,7 +72,7 @@ if command -v ollama &> /dev/null; then
     ollama pull gemma4
 fi
 
-# 4. Install Node dependencies
+# 5. Install Node dependencies
 echo ""
 echo "📦 Installing StudyForge dependencies..."
 npm install
