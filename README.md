@@ -18,13 +18,57 @@ Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Bacca
 * **Strict BAC Guidelines:** It knows the Ministry's rules. Seriously, if you try to use L'Hôpital's Rule, it will aggressively format a `\warn{}` box to remind you that the grading committee hates happiness.
 * **100% BS-Free Output:** The app spits out nothing but pure code. No AI filler like *"Here is your study guide! I hope you ace your test to become a productive member of society!"* 🤖 Just math.
 
-## How to use 🛠️
-1. Clone this bad boy and run `npm install`.
-2. Offer your Google Gemini API key to the `.env` gods: `GEMINI_API_KEY=your_key_here`
-3. Start the dev server: `npm run dev`
-4. Pick your engine, type in your subject, and hit **Construct Guide**.
-5. Switch seamlessly between raw code and compiled PDF views.
-6. Print it out. **Close your laptop.** Go actually study. Seriously, get off the internet.
+## Installation & Setup 🛠️
+
+### The "My Exam is Tomorrow" Install (Automatic)
+We wrote scripts to bootstrap your dependencies and optionally download the **Gemma 4** local model via Ollama. Just run them and go cram.
+
+**macOS & Linux:**
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+**Windows:**
+Right-click `install.ps1` and select **Run with PowerShell**, or from a terminal:
+```powershell
+.\install.ps1
+```
+
+### The "I Like Doing Things the Hard Way" Install (Manual)
+
+**1. macOS**
+* Install [Node.js](https://nodejs.org/) (we recommend `nvm` or `brew install node`).
+* *Optional for open-source mode:* Install [Ollama](https://ollama.com/download/mac).
+* Open terminal and run `ollama pull gemma4`.
+* Clone this repo, run `npm install`.
+* Start it: `npm run dev`
+
+**2. Linux (Debian/Ubuntu)**
+* `sudo apt update && sudo apt install nodejs npm`
+* *Optional for open-source mode:* `curl -fsSL https://ollama.com/install.sh | sh`
+* `ollama pull gemma4`
+* `npm install`
+* `npm run dev`
+
+**3. Windows**
+* Download and install [Node.js](https://nodejs.org/).
+* *Optional for open-source mode:* Open Terminal and run `winget install Ollama.Ollama`. Close/reopen terminal.
+* `ollama pull gemma4`
+* `npm install`
+* `npm run dev`
+
+## Bring Your Own Keys 🔑
+If you are using the cloud-based **Gemini 3.1 Pro** or **Flash** engines (because you physically don't have the RAM to run Gemma 4 locally), you need a key.
+1. Create a `.env` file in the root directory.
+2. Offer your Google Gemini API key to the `.env` gods:
+```env
+GEMINI_API_KEY=your_key_here
+```
+*(If you're exclusively running local Gemma 4 offline, skip this!)*
+
+## Contribution 🤝
+Love open-source shits? Same here. 🏡 Whether you're fixing our chaotic logic or adding new UI themes, we want you! Read our [`CONTRIBUTING.md`](./CONTRIBUTING.md) to understand our aesthetic laws and how to submit a PR.
 
 ## Disclaimer ⚠️
 StudyForge generates the *guide*. It cannot generate the *motivation* to read it, nor can it absorb the knowledge into your brain via osmosis. May the curve be ever in your favor. 🍀
