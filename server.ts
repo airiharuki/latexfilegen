@@ -401,9 +401,6 @@ async function startServer() {
       if (!apiKey) {
         return res.status(500).json({ detail: "Gemini API key not configured on server" });
       }
-      if (apiKey === "MY_GEMINI_API_KEY") {
-        return res.status(500).json({ detail: "API key is still set to the default placeholder 'MY_GEMINI_API_KEY'. Please update the Secrets panel with your real Google AI Studio key." });
-      }
       
       const ai = new GoogleGenAI({ apiKey });
       const aiModel = model || 'gemini-3.1-pro-preview';
