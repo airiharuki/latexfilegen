@@ -35,8 +35,17 @@ echo ""
 
 # 1. Check for Git and Clone
 if ! command -v git &> /dev/null; then
-    echo "❌ ERROR: Git is not installed. Please install Git first."
-    exit 1
+    echo "🛠️ Git is not installed. Auto-installing..."
+    if command -v brew &> /dev/null; then
+        brew install git
+    else
+        echo "📦 Initiating Apple Command Line Tools installation (includes Git)..."
+        xcode-select --install
+        echo "⚠️ Please complete the installation dialog that just appeared, then re-run this script."
+        exit 1
+    fi
+else
+    echo "✅ Git is already installed."
 fi
 
 if [ ! -f "package.json" ]; then

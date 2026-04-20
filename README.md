@@ -48,6 +48,7 @@ irm https://raw.githubusercontent.com/airiharuki/latexfilegen/main/install.ps1 |
 ### The "I Like Doing Things the Hard Way" Install (Manual)
 
 **Step 1: Grab the code**
+*(You will need [Git](https://git-scm.com/) installed on your machine to clone the repository)*
 ```bash
 git clone https://github.com/airiharuki/latexfilegen.git
 cd latexfilegen

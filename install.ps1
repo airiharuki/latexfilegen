@@ -24,8 +24,19 @@ Write-Host ""
 
 # 1. Check for Git and Clone
 if (!(Get-Command git -ErrorAction SilentlyContinue)) {
-    Write-Host "❌ ERROR: Git is not installed. Please install Git from https://git-scm.com/" -ForegroundColor Red
-    Exit 1
+    Write-Host "🛠️ Git is not installed. Auto-installing silently via Winget..." -ForegroundColor Yellow
+    winget install Git.Git --accept-package-agreements --accept-source-agreements --silent
+    
+    Write-Host "🔄 Refreshing environment variables to add Git to PATH..." -ForegroundColor Cyan
+    $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
+    
+    if (!(Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Host "❌ ERROR: Git installation failed or PATH couldn't be resolved. Please install manually from https://git-scm.com/" -ForegroundColor Red
+        Exit 1
+    }
+    Write-Host "✅ Git installed and PATH updated successfully!" -ForegroundColor Green
+} else {
+    Write-Host "✅ Git is already installed." -ForegroundColor Green
 }
 
 if (-not (Test-Path "package.json")) {

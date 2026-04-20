@@ -23,9 +23,15 @@ echo ""
 
 # 1. Check for Git and Clone
 if ! command -v git &> /dev/null; then
-    echo "❌ ERROR: Git is not installed."
-    echo "Please install Git first."
-    exit 1
+    echo "🛠️ Git is not installed. Auto-installing..."
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update && sudo apt-get install -y git
+    else
+        echo "❌ apt-get not found. Cannot auto-install Git. Please install it manually."
+        exit 1
+    fi
+else
+    echo "✅ Git is already installed."
 fi
 
 if [ ! -f "package.json" ]; then
