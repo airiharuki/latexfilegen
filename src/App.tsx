@@ -213,7 +213,7 @@ export default function App() {
 
               <div className="grid md:grid-cols-2 gap-6 relative z-10">
                 <div className="flex flex-col gap-2.5">
-                  <label className="text-xs font-bold tracking-widest uppercase text-white/50 pl-1">Square 1 Injection (OCR)</label>
+                  <label className="text-xs font-bold tracking-widest uppercase text-white/50 pl-1">Lecture BS You Ignored (OCR)</label>
                   <div className="relative group w-full bg-black/20 border-2 border-dashed border-white/10 hover:border-white/30 hover:bg-black/40 rounded-2xl p-5 text-center transition-all cursor-pointer shadow-inner overflow-hidden">
                     <input 
                       type="file" 
@@ -224,7 +224,7 @@ export default function App() {
                     />
                     <div className="opacity-60 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-1.5">
                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                       <span className="font-medium text-sm">Drop class notes, syllabus, or slides</span>
+                       <span className="font-medium text-sm">Drop unread slides or terrible notes</span>
                     </div>
                   </div>
                   {files.length > 0 && (
