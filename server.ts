@@ -401,6 +401,9 @@ async function startServer() {
       if (!apiKey) {
         return res.status(500).json({ detail: "Gemini API key not configured on server" });
       }
+      if (apiKey === "MY_GEMINI_API_KEY") {
+        return res.status(500).json({ detail: "API key is still set to the default placeholder 'MY_GEMINI_API_KEY'. Please update the Secrets panel with your real Google AI Studio key." });
+      }
       
       const ai = new GoogleGenAI({ apiKey });
       const aiModel = model || 'gemini-3.1-pro-preview';
@@ -409,10 +412,24 @@ async function startServer() {
         ? "Topics to cover: The ENTIRE standard Cambodian Grade 12 curriculum for this subject. Outline and exhaustively cover all major chapters required for the BAC exam."
         : `Topics to cover: ${topics.join(", ")}`;
 
+      let additionalContext = "";
+      if (full_syllabus && (subject.toLowerCase().includes("physics") || subject.toLowerCase().includes("រូបវិទ្យា"))) {
+        additionalContext = `
+[CAMBODIAN GRADE 12 PHYSICS CURRICULUM CONSTRAINTS]
+Unit 1: Thermodynamics (Kinetic Theory of Gases, First Law of Thermodynamics, Engines) - [CORE/REQUIRED]
+Unit 2: Waves (Superposition and Standing Waves) - [CORE/REQUIRED], (Interference and Diffraction) - [OPTIONAL]
+Unit 3: Electricity and Magnetism (Magnetic Field, EM Induction, Self-Inductance, AC Current, EM Waves) - [CORE/REQUIRED]
+Unit 4: Modern & Nuclear Physics (Solid State, Atom Structure, Nuclear Physics, Particle Physics) - [OPTIONAL]
+
+* CRITICAL INSTRUCTION: The Ministry of Education (MoEYS) does NOT typically expect "Interference and Diffraction" (Unit 2, Chapter 2) or the entirety of "Modern Physics / Nuclear Physics" (Unit 4) on the final BAC exam. While these can be briefly mentioned as optional review, the study guide MUST heavily prioritize exhaustive formulas, theories, and examples for Thermodynamics, Electromagnetism, and Superposition/Standing Waves.
+`;
+      }
+
       let userText = `Generate a complete BAC study guide for:
 
 Subject: ${subject}
 ${topic_instruction}
+${additionalContext}
 ${extra_rules ? "Additional rules: " + extra_rules : ""}
 
 Output ONLY the raw .tex file. Start with \\documentclass. End with \\end{document}.
