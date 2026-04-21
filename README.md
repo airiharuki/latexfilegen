@@ -95,5 +95,24 @@ Love open-source shits? Same here. 🏡 Whether you're fixing our chaotic logic 
 ## License 📄
 This project is licensed under the Apache License 2.0. See the [LICENSE](./LICENSE) file for more details.
 
+### TL;DR (The "Human-Readable" Summary)
+*Disclaimer: This is just a summary for quick reference. Please read the full [LICENSE](./LICENSE) for the actual legal terms.*
+
+**✅ What you CAN do:**
+- **Commercial Use:** Use this code for commercial purposes.
+- **Modification:** Change anything you want.
+- **Distribution:** Share the code or its derivatives with others.
+- **Sublicensing:** Use this as part of a larger project.
+
+**⚠️ What you MUST do:**
+- **Include License:** If you redistribute the code, you MUST include the original license and copyright notice.
+- **State Changes:** If you modify files, it's good practice (and required for major changes) to state that you've done so.
+
+**❌ What you CAN'T do:**
+- **Use the Trademarks:** You cannot use our trademarks or logos without permission.
+- **Hold Us Liable:** This software is provided "as-is" without any warranty. We are not liable for any damages (like if the AI hallucinates a wrong formula and it breaks your study flow).
+
+Seriously, read the [full legal text](./LICENSE) for all the specific details.
+
 ## Disclaimer ⚠️
 StudyForge generates the *guide*. It cannot generate the *motivation* to read it, nor can it absorb the knowledge into your brain via osmosis. May the curve be ever in your favor. 🍀
