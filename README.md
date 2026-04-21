@@ -92,5 +92,8 @@ GEMINI_API_KEY=your_key_here
 ## Contribution 🤝
 Love open-source shits? Same here. 🏡 Whether you're fixing our chaotic logic or adding new UI themes, we want you! Read our [`CONTRIBUTING.md`](./CONTRIBUTING.md) to understand our aesthetic laws and how to submit a PR.
 
+## License 📄
+This project is licensed under the Apache License 2.0. See the [LICENSE](./LICENSE) file for more details.
+
 ## Disclaimer ⚠️
 StudyForge generates the *guide*. It cannot generate the *motivation* to read it, nor can it absorb the knowledge into your brain via osmosis. May the curve be ever in your favor. 🍀

@@ -397,12 +397,12 @@ async function startServer() {
         return res.status(400).json({ detail: "Missing topics. Provide limits or select full syllabus." });
       }
 
-      const apiKey = process.env.GEMINI_API_KEY;
+      const apiKey = process.env.GEMINI_API_KEY_2 || process.env.GEMINI_API_KEY;
       if (!apiKey) {
         return res.status(500).json({ detail: "Gemini API key not configured on server" });
       }
       if (apiKey === "MY_GEMINI_API_KEY") {
-        return res.status(500).json({ detail: "API key is still set to the default placeholder 'MY_GEMINI_API_KEY'. Please update the Secrets panel with your real Google AI Studio key." });
+        return res.status(500).json({ detail: "API key is still set to the default placeholder. Please map your real key to GEMINI_API_KEY_2." });
       }
       
       const ai = new GoogleGenAI({ apiKey });
@@ -454,18 +454,59 @@ No markdown fences. No explanation.`;
         contents = [userText];
       }
 
-      console.log("Generating for:", subject, topics, "With files:", files ? files.length : 0);
+      console.log("Generating for:", subject, "Model:", aiModel, "With files:", files ? files.length : 0);
 
-      const response = await ai.models.generateContent({
-        model: aiModel,
-        contents: contents,
-        config: {
-          systemInstruction: SYSTEM_PROMPT,
-          temperature: 0.2,
+      let raw_tex = "";
+
+      if (aiModel === "gemma-4") {
+        console.log("Routing to Ollama API for Gemma 4...");
+        try {
+          const ollamaUrl = process.env.OLLAMA_BASE_URL || "http://127.0.0.1:11434";
+          const ollamaRes = await fetch(`${ollamaUrl}/api/generate`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "gemma4",
+              system: SYSTEM_PROMPT,
+              prompt: userText,
+              stream: false,
+              options: { temperature: 0.2 }
+            })
+          });
+          
+          if (!ollamaRes.ok) {
+            const errData = await ollamaRes.text();
+            throw new Error(`Ollama Error ${ollamaRes.status}: ${errData}`);
+          }
+          
+          const ollamaData = await ollamaRes.json();
+          raw_tex = ollamaData.response || "";
+        } catch (e: any) {
+          return res.status(500).json({ detail: `Ollama compilation failed. Check if your server at OLLAMA_BASE_URL is reachable. Error: ${e.message}` });
         }
-      });
-
-      let raw_tex = response.text || "";
+      } else {
+        try {
+          const response = await ai.models.generateContent({
+            model: aiModel,
+            contents: contents,
+            config: {
+              systemInstruction: SYSTEM_PROMPT,
+              temperature: 0.2,
+            }
+          });
+          raw_tex = response.text || "";
+        } catch (e: any) {
+          let msg = e.message || "Unknown Error";
+          if (msg.includes("429") || msg.includes("Quota")) {
+            return res.status(429).json({ detail: "Google API Quota Exceeded. You have hit your free-tier limits. Please switch to Gemma-4 (Local) in the Engine dropdown or try again later." });
+          } else if (msg.includes("403") || msg.includes("denied")) {
+            return res.status(403).json({ detail: "Permission Denied. Your project has been denied access to the Gemini API. Please contact support." });
+          } else if (msg.includes("API key not valid") || msg.includes("400") || msg.includes("API_KEY_INVALID")) {
+            return res.status(400).json({ detail: "API key not valid. Please verify your custom GEMINI_API_KEY_2 in the Secrets panel." });
+          }
+          return res.status(500).json({ detail: `Gemini API Error: ${msg}` });
+        }
+      }
       
       // Sanitize LaTeX
       raw_tex = raw_tex.replace(/^```[a-z]*\n?/gm, "");
