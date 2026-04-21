@@ -1,5 +1,7 @@
 # Contributing to StudyForge 🏡
 
+If you've peeked into here, it means you're interested in helping us build a better tool for the next generation of Cambodian students. We are genuinely grateful for your interest. StudyForge started as a way to survive the BAC exam, but with your help, it can become a pillar for every student in the Kingdom who needs a clear path to success.
+
 First off, thank you for considering contributing to StudyForge! We love open source shits in this house. This project thrives on the chaotic energy of students and developers trying to make the Cambodian BAC exam slightly less agonizing.
 
 ## How Can I Contribute?
