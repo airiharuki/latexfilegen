@@ -11,9 +11,27 @@ Found a bug in our "Liquid Glass" UI? Discovered a prompt injection that acciden
 - Open an Issue.
 - Fork the repository.
 - Create a feature branch: `git checkout -b feature/your-awesome-fix`
-- Commit your changes: `git commit -m "Fix: Stop the AI from hallucinating inverse tangents"`
+- Commit your changes: `git commit -m "fix(logic): stop the AI from hallucinating inverse tangents"`
 - Push to the branch: `git push origin feature/your-awesome-fix`
 - Submit a Pull Request.
+
+## The Law of Commits (Conventional Commits) 📜
+
+We aren't savages. If you're going to push code, you **MUST** follow the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification. If your commit message looks like "fixed stuff" or "help me", your PR will be nuked from orbit. No exceptions.
+
+Here is the breakdown so you don't mess it up:
+- **`feat:`** You added a shiny new feature (e.g., `feat: add glassmorphism to sidebar`).
+- **`fix:`** You fixed a bug (e.g., `fix: stop the AI from trying to divide by zero`).
+- **`docs:`** You updated documentation. You're a hero.
+- **`style:`** Visual tweaks, white-space, formatting—anything that doesn't change logic.
+- **`refactor:`** Rewriting logic without changing behavior. Cleaning up your mess.
+- **`perf:`** Code changes that improve performance. Making it go zoom.
+- **`test:`** Adding missing tests or correcting existing tests.
+- **`chore:`** Maintenance tasks, dependency updates, or build script changes. The "boring but necessary" stuff.
+
+Example: `feat(ui): add glowing border to primary button`
+
+Following this keeps our git history clean and prevents the maintainers from having a mental breakdown.
 
 ### 2. Syllabus Mappings 📚
 Grade 12 syllabuses change. If you know the exact pacing of the MoEYS (Ministry of Education) curriculum and want to hardcode specific structures or cheat sheet definitions into the prompts, submit them! 
