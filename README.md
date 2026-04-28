@@ -18,6 +18,9 @@ Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Bacca
 ## Features 🚀
 * **Model Selection Engine:** Choose your fighter. Toggle between **Gemini 3.1 Pro** for heavy logic, **Gemini 3 Flash** for when the exam starts in 10 minutes, or **Gemma 4** for access via open weights! (Because we love open source shits in this house 🏡)
 * **Liquid Glass Interface:** An insanely unnecessary but absolutely gorgeous visual aesthetic. Fluid, crystal-clear glassmorphism with VHS grain. If you're going to fail, fail *aesthetic*.
+* **The Vibe Check ✨🍵:** 
+    - **Light Mode:** Designed for **performative mfs** who study in Starbucks while listening to Clairo, Beabadoobee, or The Marías, and maybe the Laufey as well. 🍵✨ Optimized for maximum visibility while you sip your $7 matcha and pretend the "Summary" section isn't just AI-generated lies.
+    - **Performative Aesthetics:** Whether you're a "Clean Girl" aesthetic disciple color-coding your failure, or a "Downtown Girl" romanticizing the struggle, or even a "Performative Academic" male carrying *The Myth of Sisyphus* just to look deep—we built this for your TikTok desk setup videos. It's for the "Productive 5 AM Routine" that actually started with 3 hours of doomscrolling.
 * **Intelligent PDF Compilation:** The app operates on true dual-mode logic. 
   - **Local/Offline:** If you're running Gemma 4 offline and have `texlive` (`xelatex`) installed on your system, it compiles the PDF natively using `child_process`.
   - **Remote (Fallback):** Don't have a 6GB LaTeX installation lying around? The app dynamically falls back to piping the `.tex` output straight to an external texlive API. *(Note: Using this cloud fallback while running the "offline" Gemma 4 mode is highly unrecommended, as it completely defeats the purpose of an isolated, offline privacy stack. Install MiKTeX or MacTeX if you want to stay off the grid!)*
