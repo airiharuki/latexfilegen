@@ -20,6 +20,7 @@ Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Bacca
 * **Liquid Glass Interface:** An insanely unnecessary but absolutely gorgeous visual aesthetic. Fluid, crystal-clear glassmorphism with VHS grain. If you're going to fail, fail *aesthetic*.
 * **The Vibe Check ✨🍵:** 
     - **Light Mode:** Designed for **performative mfs** who study in Starbucks while listening to Clairo, Beabadoobee, or The Marías, and maybe the Laufey as well. 🍵✨ Optimized for maximum visibility while you sip your $7 matcha and pretend the "Summary" section isn't just AI-generated lies.
+    - **Dark Mode:** For the **3:00 AM** academic weapon who is fueled by nothing but cold coffee, self-loathing, and the desperate hope for a curve 🤡. Optimized to hide your tears while you cram the entire year's curriculum into one night of pure panic 💀.
     - **Performative Aesthetics:** Whether you're a "Clean Girl" aesthetic disciple color-coding your failure, or a "Downtown Girl" romanticizing the struggle, or even a "Performative Academic" male carrying *The Myth of Sisyphus* just to look deep—we built this for your TikTok desk setup videos. It's for the "Productive 5 AM Routine" that actually started with 3 hours of doomscrolling.
 * **Intelligent PDF Compilation:** The app operates on true dual-mode logic. 
   - **Local/Offline:** If you're running Gemma 4 offline and have `texlive` (`xelatex`) installed on your system, it compiles the PDF natively using `child_process`.

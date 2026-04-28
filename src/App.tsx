@@ -4,7 +4,9 @@ import { Sun, Moon } from 'lucide-react';
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window !== 'undefined') {
-      return (document.documentElement.classList.contains('dark') ? 'dark' : 'light') as "light" | "dark";
+      // Prioritize "dark" if no class is found, or check for saved preference if available
+      // For now, let's just make it default to dark.
+      return (document.documentElement.classList.contains('light') ? 'light' : 'dark') as "light" | "dark";
     }
     return "dark";
   });
