@@ -1,5 +1,11 @@
 # StudyForge 🔨📚
 
+![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg) 
+![TypeScript](https://img.shields.io/badge/Language-TypeScript-blue?logo=typescript&logoColor=white) 
+![React](https://img.shields.io/badge/Framework-React-61DAFB?logo=react&logoColor=black) 
+![Vibes](https://img.shields.io/badge/Vibes-Liquid_Glass-ff69b4)
+![Build](https://img.shields.io/badge/Built_with-Panic-red?logo=fire)
+
 **Because crying over past papers is a rite of passage, but formatting your study notes shouldn't be.**
 
 Welcome to **StudyForge**, the ultimate weapon for surviving the Cambodian Baccalaureate (BAC) exam. Powered by Google's GenAI and pure, unfiltered panic, this app takes your desperate 3:00 AM pleas for knowledge (e.g., "Subject: Math, Topics: Integration", "Rule: Explain it like my exam is tomorrow") and transmutes them into beautifully formatted, battle-ready LaTeX (`.tex`) code. All wrapped in a sleek "Liquid Glass" interface, so at least your screen looks good while you question your life choices.
